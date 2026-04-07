@@ -1,0 +1,49 @@
+import { useEffect, useState } from "react";
+
+type InitialValue<T> = T | (() => T);
+type Options<T> = {
+  deserialize?: (value: string) => T;
+  serialize?: (value: T) => string;
+};
+
+const defaultDeserialize = <T,>(value: string) => JSON.parse(value) as T;
+const defaultSerialize = <T,>(value: T) => JSON.stringify(value);
+
+function resolveInitialValue<T>(value: InitialValue<T>) {
+  return typeof value === "function" ? (value as () => T)() : value;
+}
+
+export function usePersistentState<T>(
+  key: string,
+  initialValue: InitialValue<T>,
+  options: Options<T> = {}
+) {
+  const deserialize = options.deserialize ?? defaultDeserialize<T>;
+  const serialize = options.serialize ?? defaultSerialize<T>;
+  const [value, setValue] = useState<T>(() => {
+    const fallback = resolveInitialValue(initialValue);
+    if (typeof window === "undefined") {
+      return fallback;
+    }
+
+    const savedValue = window.localStorage.getItem(key);
+    if (savedValue === null) {
+      return fallback;
+    }
+
+    try {
+      return deserialize(savedValue);
+    } catch {
+      return fallback;
+    }
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    window.localStorage.setItem(key, serialize(value));
+  }, [key, serialize, value]);
+
+  return [value, setValue] as const;
+}

@@ -1,0 +1,247 @@
+{
+  "name": "CadQuery Official Examples",
+  "count": 40,
+  "source": "https://cadquery.readthedocs.io/en/latest/examples.html#",
+  "examples": [
+    {
+      "id": 1,
+      "title": "Simple Rectangular Plate",
+      "file": "01_simple-rectangular-plate.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 2,
+      "title": "Plate with Hole",
+      "file": "02_plate-with-hole.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 3,
+      "title": "An extruded prismatic solid",
+      "file": "03_an-extruded-prismatic-solid.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 4,
+      "title": "Building Profiles using lines and arcs",
+      "file": "04_building-profiles-using-lines-and-arcs.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 5,
+      "title": "Moving The Current working point",
+      "file": "05_moving-the-current-working-point.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 6,
+      "title": "Using Point Lists",
+      "file": "06_using-point-lists.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 7,
+      "title": "Polygons",
+      "file": "07_polygons.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 8,
+      "title": "Polylines",
+      "file": "08_polylines.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 9,
+      "title": "Defining an Edge with a Spline",
+      "file": "09_defining-an-edge-with-a-spline.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 10,
+      "title": "Mirroring Symmetric Geometry",
+      "file": "10_mirroring-symmetric-geometry.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 11,
+      "title": "Mirroring 3D Objects",
+      "file": "11_mirroring-3d-objects.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 12,
+      "title": "Mirroring From Faces",
+      "file": "12_mirroring-from-faces.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 13,
+      "title": "Creating Workplanes on Faces",
+      "file": "13_creating-workplanes-on-faces.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 14,
+      "title": "Locating a Workplane on a vertex",
+      "file": "14_locating-a-workplane-on-a-vertex.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 15,
+      "title": "Offset Workplanes",
+      "file": "15_offset-workplanes.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 16,
+      "title": "Copying Workplanes",
+      "file": "16_copying-workplanes.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 17,
+      "title": "Rotated Workplanes",
+      "file": "17_rotated-workplanes.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 18,
+      "title": "Using construction Geometry",
+      "file": "18_using-construction-geometry.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 19,
+      "title": "Shelling To Create Thin features",
+      "file": "19_shelling-to-create-thin-features.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 20,
+      "title": "Shelling To Create Thin features",
+      "file": "20_shelling-to-create-thin-features.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 21,
+      "title": "Shelling To Create Thin features",
+      "file": "21_shelling-to-create-thin-features.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 22,
+      "title": "Shelling To Create Thin features",
+      "file": "22_shelling-to-create-thin-features.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 23,
+      "title": "Making Lofts",
+      "file": "23_making-lofts.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 24,
+      "title": "Extruding until a given face",
+      "file": "24_extruding-until-a-given-face.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 25,
+      "title": "Extruding until a given face",
+      "file": "25_extruding-until-a-given-face.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 26,
+      "title": "Extruding until a given face",
+      "file": "26_extruding-until-a-given-face.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 27,
+      "title": "Making Counter-bored and Counter-sunk Holes",
+      "file": "27_making-counter-bored-and-counter-sunk-holes.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 28,
+      "title": "Offsetting wires in 2D",
+      "file": "28_offsetting-wires-in-2d.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 29,
+      "title": "Offsetting wires in 2D",
+      "file": "29_offsetting-wires-in-2d.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 30,
+      "title": "Rounding Corners with Fillet",
+      "file": "30_rounding-corners-with-fillet.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 31,
+      "title": "Tagging objects",
+      "file": "31_tagging-objects.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 32,
+      "title": "Tagging objects",
+      "file": "32_tagging-objects.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 33,
+      "title": "A Parametric Bearing Pillow Block",
+      "file": "33_a-parametric-bearing-pillow-block.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 34,
+      "title": "Splitting an Object",
+      "file": "34_splitting-an-object.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 35,
+      "title": "The Classic OCC Bottle",
+      "file": "35_the-classic-occ-bottle.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 36,
+      "title": "A Parametric Enclosure",
+      "file": "36_a-parametric-enclosure.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 37,
+      "title": "Lego Brick",
+      "file": "37_lego-brick.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 38,
+      "title": "Braille Example",
+      "file": "38_braille-example.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 39,
+      "title": "Panel With Various Connector Holes",
+      "file": "39_panel-with-various-connector-holes.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    },
+    {
+      "id": 40,
+      "title": "Cycloidal gear",
+      "file": "40_cycloidal-gear.py",
+      "source": "https://cadquery.readthedocs.io/en/latest/examples.html#"
+    }
+  ]
+}

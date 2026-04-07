@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+node_modules/
+dist/
+.logs/
+*.stl
+*.step
+*.stp
+.vscode/
+*.pyc
+.pytest_cache/
+.DS_Store
+gui-bridge/exports/
