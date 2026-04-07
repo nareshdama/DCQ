@@ -10,7 +10,9 @@ import {
   useState,
 } from "react";
 import AppHeader from "./components/AppHeader";
+import AppSidebar from "./components/AppSidebar";
 import ConsolePanel from "./components/ConsolePanel";
+import CommandPalette from "./components/CommandPalette";
 import EditorToolbar from "./components/EditorToolbar";
 import PanelPlaceholder from "./components/PanelPlaceholder";
 import { SHELL_LAYOUT, STARTER_SCRIPT, STORAGE_KEYS } from "./constants";
@@ -26,7 +28,8 @@ function clampRightWidth(next: number, viewport = window.innerWidth) {
     viewport,
     SHELL_LAYOUT.minEditorWidth +
       SHELL_LAYOUT.minPreviewWidth +
-      SHELL_LAYOUT.shellChrome
+      SHELL_LAYOUT.shellChrome +
+      64 // sidebar width
   );
   const safeNext = Number.isFinite(next)
     ? next
@@ -36,7 +39,7 @@ function clampRightWidth(next: number, viewport = window.innerWidth) {
     SHELL_LAYOUT.minPreviewWidth,
     Math.min(
       SHELL_LAYOUT.maxPreviewWidth,
-      safeViewport - SHELL_LAYOUT.minEditorWidth - SHELL_LAYOUT.shellChrome,
+      safeViewport - SHELL_LAYOUT.minEditorWidth - SHELL_LAYOUT.shellChrome - 64,
       safeNext
     )
   );
@@ -54,6 +57,7 @@ export default function App() {
   const [script, setScript] = useState(STARTER_SCRIPT);
   const [liveMode, setLiveMode] = useState(true);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [sidebarTab, setSidebarTab] = useState("editor");
   const [compactMode, setCompactMode] = usePersistentState<boolean>(
     STORAGE_KEYS.compactMode,
     false,
@@ -122,6 +126,7 @@ export default function App() {
       }
       setScript(code);
       setStatus({ label: "Example loaded", tone: "info" });
+      setSidebarTab("editor");
     } catch (error) {
       setStatus({ label: (error as Error).message, tone: "danger" });
     }
@@ -184,7 +189,7 @@ export default function App() {
     const onMove = (moveEvent: PointerEvent) => {
       const viewport = window.innerWidth;
       const next = clampRightWidth(
-        viewport - moveEvent.clientX - SHELL_LAYOUT.shellChrome,
+        viewport - moveEvent.clientX - SHELL_LAYOUT.shellChrome - 64,
         viewport
       );
       setRightWidth(next);
@@ -295,8 +300,62 @@ export default function App() {
     setClearedConsoleKey(consoleContentKey);
   }, [consoleContentKey]);
 
+  const commandPaletteActions = useMemo(
+    () => [
+      {
+        id: "run",
+        title: "Run Script",
+        shortcut: "Ctrl+R",
+        category: "Script",
+        handler: runScriptNow,
+      },
+      {
+        id: "export",
+        title: "Export STL + STEP",
+        shortcut: "Ctrl+E",
+        category: "File",
+        handler: exportModel,
+      },
+      {
+        id: "toggle-live",
+        title: "Toggle Live Mode",
+        shortcut: "Ctrl+K",
+        category: "Settings",
+        handler: () => setLiveMode((v) => !v),
+      },
+      {
+        id: "toggle-compact",
+        title: "Toggle Compact Mode",
+        category: "View",
+        handler: () => setCompactMode((v) => !v),
+      },
+      {
+        id: "toggle-toolbar",
+        title: editorHeaderCollapsed ? "Show Code Toolbar" : "Hide Code Toolbar",
+        category: "View",
+        handler: () => setEditorHeaderCollapsed((v) => !v),
+      },
+      {
+        id: "show-console",
+        title: "Show Console",
+        category: "View",
+        handler: () => setConsoleOpen(true),
+      },
+    ],
+    [runScriptNow, exportModel, editorHeaderCollapsed, setCompactMode, setEditorHeaderCollapsed, setConsoleOpen]
+  );
+
   return (
     <main className={`shellRoot ${compactMode ? "shellRoot--compact" : ""}`}>
+      <AppSidebar
+        status={status}
+        activeTab={sidebarTab}
+        onTabChange={setSidebarTab}
+        onRun={runScriptNow}
+        onExport={exportModel}
+        onTogglePalette={toggleCommandPalette}
+      />
+      
       <div
         className="appRoot"
         style={
@@ -316,62 +375,83 @@ export default function App() {
             onTogglePalette={toggleCommandPalette}
             status={status}
           />
-          <Suspense
-            fallback={
-              <PanelPlaceholder
-                className="editorShell paneSection paneSection--editor"
-                title="Code"
-                description="Loading editor..."
-              />
-            }
-          >
-            <CodeEditor
-              value={script}
-              onChange={setScript}
-              diagnostics={diagnostics}
-              headerCollapsed={editorHeaderCollapsed}
-              headerActions={
-                <EditorToolbar
-                  consoleOpen={consoleOpen}
-                  examples={examples}
-                  onExampleChange={handleExampleSelection}
-                  onToggleConsole={() => setConsoleOpen((value) => !value)}
-                  selectedExampleFile={selectedExampleFile}
-                />
-              }
-              onToggleHeader={() => setEditorHeaderCollapsed((value) => !value)}
-            />
-          </Suspense>
-          {consoleOpen ? (
-            <>
-              <div
-                className="consoleSplitter"
-                role="separator"
-                aria-label="Resize console panel"
-                aria-orientation="horizontal"
-                aria-valuemin={SHELL_LAYOUT.minConsoleHeight}
-                aria-valuemax={SHELL_LAYOUT.maxConsoleHeight}
-                aria-valuenow={consoleHeight}
-                tabIndex={0}
-                onPointerDown={beginConsoleResize}
-                onKeyDown={handleConsoleSplitterKeyDown}
-              />
-              <ConsolePanel
-                height={consoleHeight}
-                status={status}
-                diagnostics={visibleDiagnostics}
-                stdout={visibleStdout}
-                stderr={visibleStderr}
-                onHide={() => setConsoleOpen(false)}
-                onClear={clearConsole}
-                canClear={
-                  visibleDiagnostics.length > 0 ||
-                  Boolean(visibleStdout?.trim()) ||
-                  Boolean(visibleStderr.trim())
+          
+          <div className="mainWorkspace">
+            {sidebarTab === "examples" ? (
+              <aside className="examplesSidebar">
+                <div className="sidebarHeader">
+                  <h3>Example Library</h3>
+                </div>
+                <div className="examplesList">
+                  {examples.map((ex) => (
+                    <button
+                      key={ex.id}
+                      className={`exampleItem ${selectedExampleFile === ex.file ? "exampleItem--active" : ""}`}
+                      onClick={() => handleExampleSelection(ex.file)}
+                    >
+                      {ex.title}
+                    </button>
+                  ))}
+                </div>
+              </aside>
+            ) : null}
+
+            <div className="editorArea">
+              <Suspense
+                fallback={
+                  <PanelPlaceholder
+                    className="editorShell paneSection paneSection--editor"
+                    title="Code"
+                    description="Loading editor..."
+                  />
                 }
-              />
-            </>
-          ) : null}
+              >
+                <CodeEditor
+                  value={script}
+                  onChange={setScript}
+                  diagnostics={diagnostics}
+                  headerCollapsed={editorHeaderCollapsed}
+                  headerActions={
+                    <EditorToolbar
+                      consoleOpen={consoleOpen}
+                      onToggleConsole={() => setConsoleOpen((value) => !value)}
+                    />
+                  }
+                  onToggleHeader={() => setEditorHeaderCollapsed((value) => !value)}
+                />
+              </Suspense>
+              {consoleOpen ? (
+                <>
+                  <div
+                    className="consoleSplitter"
+                    role="separator"
+                    aria-label="Resize console panel"
+                    aria-orientation="horizontal"
+                    aria-valuemin={SHELL_LAYOUT.minConsoleHeight}
+                    aria-valuemax={SHELL_LAYOUT.maxConsoleHeight}
+                    aria-valuenow={consoleHeight}
+                    tabIndex={0}
+                    onPointerDown={beginConsoleResize}
+                    onKeyDown={handleConsoleSplitterKeyDown}
+                  />
+                  <ConsolePanel
+                    height={consoleHeight}
+                    status={status}
+                    diagnostics={visibleDiagnostics}
+                    stdout={visibleStdout}
+                    stderr={visibleStderr}
+                    onHide={() => setConsoleOpen(false)}
+                    onClear={clearConsole}
+                    canClear={
+                      visibleDiagnostics.length > 0 ||
+                      Boolean(visibleStdout?.trim()) ||
+                      Boolean(visibleStderr.trim())
+                    }
+                  />
+                </>
+              ) : null}
+            </div>
+          </div>
         </section>
         <div
           className="splitter"
@@ -400,75 +480,12 @@ export default function App() {
           </Suspense>
         </section>
       </div>
+      
       {paletteOpen ? (
-        <div className="paletteBackdrop" onClick={() => setPaletteOpen(false)}>
-          <div className="palette" onClick={(event) => event.stopPropagation()}>
-            <h3>Command Palette</h3>
-            <button
-              onClick={() => {
-                runScriptNow();
-                setPaletteOpen(false);
-              }}
-            >
-              Run Script
-            </button>
-            <button
-              onClick={() => {
-                exportModel();
-                setPaletteOpen(false);
-              }}
-            >
-              Export STL + STEP
-            </button>
-            <button
-              onClick={() => {
-                setLiveMode((v) => !v);
-                setPaletteOpen(false);
-              }}
-            >
-              Toggle Live Mode
-            </button>
-            <button
-              onClick={() => {
-                setCompactMode((value) => !value);
-                setPaletteOpen(false);
-              }}
-            >
-              Toggle Compact Mode
-            </button>
-            <button
-              onClick={() => {
-                setEditorHeaderCollapsed((value) => !value);
-                setPaletteOpen(false);
-              }}
-            >
-              {editorHeaderCollapsed ? "Show Code Toolbar" : "Hide Code Toolbar"}
-            </button>
-            <button
-              onClick={() => {
-                void loadExampleIntoEditor();
-                setPaletteOpen(false);
-              }}
-            >
-              Load Selected Example
-            </button>
-            <button
-              onClick={() => {
-                setConsoleOpen(true);
-                setPaletteOpen(false);
-              }}
-            >
-              Show Console
-            </button>
-            <button
-              onClick={() => {
-                setPaletteOpen(false);
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
+        <CommandPalette
+          actions={commandPaletteActions}
+          onClose={() => setPaletteOpen(false)}
+        />
       ) : null}
     </main>
   );

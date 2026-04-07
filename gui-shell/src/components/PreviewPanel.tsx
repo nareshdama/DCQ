@@ -219,14 +219,17 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
     const center = box.getCenter(new Vector3());
     const maxDim = Math.max(size.x, size.y, size.z, 1);
 
-    camera.near = maxDim / 200;
-    camera.far = maxDim * 200;
+    camera.near = maxDim / 1000;
+    camera.far = maxDim * 1000;
     camera.updateProjectionMatrix();
+
+    const distance = maxDim * 2.2;
     camera.position.set(
-      center.x + maxDim * 1.4,
-      center.y + maxDim * 1.1,
-      center.z + maxDim * 1.4
+      center.x + distance * 0.8,
+      center.y + distance * 0.7,
+      center.z + distance * 0.8
     );
+
     controls.target.copy(center);
     controls.update();
   }
@@ -562,6 +565,8 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
     }
   }
 
+  const [viewTab, setViewTab] = useState("properties");
+
   return (
     <section className="panel previewShell paneSection paneSection--preview">
       <div className="panelHeader previewHeader">
@@ -569,13 +574,9 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
           <h3>Preview</h3>
           <div className="previewTitleMeta">
             <span className="rendererBadge">{`Renderer: ${rendererLabel}`}</span>
-            <span className="rendererBadge previewModelBadge">{`Model: ${modelSourceLabel}`}</span>
           </div>
         </div>
         <div className="previewHeaderMeta">
-          <span className={`statusPill statusPill--compact statusPill--${status.tone}`}>
-            {status.label}
-          </span>
           <button
             type="button"
             onClick={() => setSettingsOpen((value) => !value)}
@@ -618,7 +619,6 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
         </div>
         <div className="viewportToolbarGroup">
           <span className="rendererBadge">{showGrid ? "Grid On" : "Grid Off"}</span>
-          <span className="rendererBadge">{showAxes ? "Axes On" : "Axes Off"}</span>
         </div>
       </div>
       <div
@@ -664,145 +664,159 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
               onKeyDown={handleInspectorSplitterKeyDown}
             />
             <aside className="previewInspector" id="preview-settings">
+              <div className="inspectorTabs">
+                <button
+                  className={`inspectorTab ${viewTab === "properties" ? "inspectorTab--active" : ""}`}
+                  onClick={() => setViewTab("properties")}
+                >
+                  Properties
+                </button>
+                <button
+                  className={`inspectorTab ${viewTab === "scene" ? "inspectorTab--active" : ""}`}
+                  onClick={() => setViewTab("scene")}
+                >
+                  Scene
+                </button>
+                <button
+                  className={`inspectorTab ${viewTab === "export" ? "inspectorTab--active" : ""}`}
+                  onClick={() => setViewTab("export")}
+                >
+                  Export
+                </button>
+              </div>
               <div className="previewInspectorBody">
-                <section className="previewInspectorSection">
-                  <div className="previewInspectorLabel">View</div>
-                  <label className="previewToggle">
-                    <input
-                      type="checkbox"
-                      checked={showGrid}
-                      onChange={(event) => setShowGrid(event.target.checked)}
-                    />
-                    <span>Show Grid</span>
-                  </label>
-                  <label className="previewToggle">
-                    <input
-                      type="checkbox"
-                      checked={showAxes}
-                      onChange={(event) => setShowAxes(event.target.checked)}
-                    />
-                    <span>Show Axes</span>
-                  </label>
-                </section>
-                <section className="previewInspectorSection">
-                  <div className="previewInspectorLabel">Grid</div>
-                  <label className="previewRangeField">
-                    <span>Grid Size</span>
-                    <input
-                      type="range"
-                      min={40}
-                      max={400}
-                      step={10}
-                      value={gridSize}
-                      onChange={(event) => setGridSize(Number(event.target.value))}
-                    />
-                  </label>
-                  <label className="previewRangeField">
-                    <span>Grid Density</span>
-                    <input
-                      type="range"
-                      min={10}
-                      max={120}
-                      step={2}
-                      value={gridDivisions}
-                      onChange={(event) => setGridDivisions(Number(event.target.value))}
-                    />
-                  </label>
-                </section>
-                <section className="previewInspectorSection">
-                  <div className="previewInspectorLabel">Material</div>
-                  <label className="previewColorField">
-                    <span>Background</span>
-                    <input
-                      type="color"
-                      value={bgColor}
-                      onChange={(event) => setBgColor(event.target.value)}
-                    />
-                  </label>
-                  <label className="previewColorField">
-                    <span>Material</span>
-                    <input
-                      type="color"
-                      value={matColor}
-                      onChange={(event) => setMatColor(event.target.value)}
-                    />
-                  </label>
-                  <label className="previewRangeField">
-                    <span>Metalness</span>
-                    <input
-                      type="range"
-                      min={0}
-                      max={1}
-                      step={0.01}
-                      value={metalness}
-                      onChange={(event) => setMetalness(Number(event.target.value))}
-                    />
-                  </label>
-                  <label className="previewRangeField">
-                    <span>Roughness</span>
-                    <input
-                      type="range"
-                      min={0}
-                      max={1}
-                      step={0.01}
-                      value={roughness}
-                      onChange={(event) => setRoughness(Number(event.target.value))}
-                    />
-                  </label>
-                </section>
-                <section className="previewInspectorSection">
-                  <div className="previewInspectorLabel">Lighting</div>
-                  <label className="previewRangeField">
-                    <span>Ambient</span>
-                    <input
-                      type="range"
-                      min={0}
-                      max={2}
-                      step={0.02}
-                      value={ambientIntensity}
-                      onChange={(event) => setAmbientIntensity(Number(event.target.value))}
-                    />
-                  </label>
-                  <label className="previewRangeField">
-                    <span>Key Light</span>
-                    <input
-                      type="range"
-                      min={0}
-                      max={3}
-                      step={0.02}
-                      value={keyIntensity}
-                      onChange={(event) => setKeyIntensity(Number(event.target.value))}
-                    />
-                  </label>
-                  <label className="previewRangeField">
-                    <span>Fill Light</span>
-                    <input
-                      type="range"
-                      min={0}
-                      max={2}
-                      step={0.02}
-                      value={fillIntensity}
-                      onChange={(event) => setFillIntensity(Number(event.target.value))}
-                    />
-                  </label>
-                </section>
+                {viewTab === "properties" && (
+                  <section className="previewInspectorSection">
+                    <div className="previewInspectorLabel">Material</div>
+                    <label className="previewColorField">
+                      <span>Material</span>
+                      <input
+                        type="color"
+                        value={matColor}
+                        onChange={(event) => setMatColor(event.target.value)}
+                      />
+                    </label>
+                    <label className="previewRangeField">
+                      <span>Metalness</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={1}
+                        step={0.01}
+                        value={metalness}
+                        onChange={(event) => setMetalness(Number(event.target.value))}
+                      />
+                    </label>
+                    <label className="previewRangeField">
+                      <span>Roughness</span>
+                      <input
+                        type="range"
+                        min={0}
+                        max={1}
+                        step={0.01}
+                        value={roughness}
+                        onChange={(event) => setRoughness(Number(event.target.value))}
+                      />
+                    </label>
+                  </section>
+                )}
+                {viewTab === "scene" && (
+                  <>
+                    <section className="previewInspectorSection">
+                      <div className="previewInspectorLabel">Environment</div>
+                      <label className="previewToggle">
+                        <input
+                          type="checkbox"
+                          checked={showGrid}
+                          onChange={(event) => setShowGrid(event.target.checked)}
+                        />
+                        <span>Show Grid</span>
+                      </label>
+                      <label className="previewToggle">
+                        <input
+                          type="checkbox"
+                          checked={showAxes}
+                          onChange={(event) => setShowAxes(event.target.checked)}
+                        />
+                        <span>Show Axes</span>
+                      </label>
+                      <label className="previewColorField">
+                        <span>Background</span>
+                        <input
+                          type="color"
+                          value={bgColor}
+                          onChange={(event) => setBgColor(event.target.value)}
+                        />
+                      </label>
+                    </section>
+                    <section className="previewInspectorSection">
+                      <div className="previewInspectorLabel">Grid</div>
+                      <label className="previewRangeField">
+                        <span>Grid Size</span>
+                        <input
+                          type="range"
+                          min={40}
+                          max={400}
+                          step={10}
+                          value={gridSize}
+                          onChange={(event) => setGridSize(Number(event.target.value))}
+                        />
+                      </label>
+                    </section>
+                    <section className="previewInspectorSection">
+                      <div className="previewInspectorLabel">Lighting</div>
+                      <label className="previewRangeField">
+                        <span>Ambient</span>
+                        <input
+                          type="range"
+                          min={0}
+                          max={2}
+                          step={0.02}
+                          value={ambientIntensity}
+                          onChange={(event) => setAmbientIntensity(Number(event.target.value))}
+                        />
+                      </label>
+                      <label className="previewRangeField">
+                        <span>Key Light</span>
+                        <input
+                          type="range"
+                          min={0}
+                          max={3}
+                          step={0.02}
+                          value={keyIntensity}
+                          onChange={(event) => setKeyIntensity(Number(event.target.value))}
+                        />
+                      </label>
+                    </section>
+                  </>
+                )}
+                {viewTab === "export" && (
+                  <section className="previewInspectorSection">
+                    <div className="previewInspectorLabel">Downloads</div>
+                    <div className="exportTabLinks">
+                      {stlUrl ? (
+                        <a href={stlUrl} download className="exportActionLink">
+                          Download STL
+                        </a>
+                      ) : (
+                        <p className="muted">No STL available</p>
+                      )}
+                      {stepUrl ? (
+                        <a href={stepUrl} download className="exportActionLink">
+                          Download STEP
+                        </a>
+                      ) : (
+                        <p className="muted">No STEP available</p>
+                      )}
+                    </div>
+                  </section>
+                )}
               </div>
             </aside>
           </>
         ) : null}
       </div>
-      <div className="exportLinks">
-        {stlUrl ? (
-          <a href={stlUrl} download>
-            Download STL
-          </a>
-        ) : null}
-        {stepUrl ? (
-          <a href={stepUrl} download>
-            Download STEP
-          </a>
-        ) : null}
-      </div>
     </section>
   );
 }
+
