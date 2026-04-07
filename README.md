@@ -62,4 +62,4 @@ For a detailed breakdown, see [ROADMAP.md](./ROADMAP.md).
 This project is licensed under the **MIT License**. See the [LICENSE](./LICENSE) file for details.
 
 ---
-Built with ❤️ by [Naresh Dama](https://github.com/nareshdama)
+Built by [Naresh Dama](https://github.com/nareshdama)
