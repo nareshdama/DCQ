@@ -35,4 +35,12 @@ export const STORAGE_KEYS = {
   compactMode: "cq-shell-compact-v1",
   editorHeaderCollapsed: "cq-editor-header-collapsed-v1",
   previewInspectorWidth: "cq-preview-inspector-width-v1",
+  script: "cq-script-v1",
+  consoleAutoOpen: "cq-console-auto-open-v1",
+  aiSettings: "cq-ai-settings-v1",
+  aiChatHistory: "cq-ai-chat-history-v1",
+  recentFiles: "cq-recent-files-v1",
+  workspacePath: "cq-workspace-path-v1",
+  projectName: "cq-project-name-v1",
+  recentProjects: "cq-recent-projects-v1",
 } as const;

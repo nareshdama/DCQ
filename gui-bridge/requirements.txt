@@ -1,4 +1,6 @@
-fastapi
+# FastAPI >=0.133 supports Starlette 1.x (avoids crash with e.g. code-review-graph / MCP stack).
+fastapi>=0.133.0,<0.136.0
 uvicorn
 python-multipart
 cadquery
+httpx

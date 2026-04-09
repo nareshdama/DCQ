@@ -1,56 +1,163 @@
-:root {
-  /* Colors */
-  --bg: #f5f5f7;
-  --panel: #ffffff;
-  --text: #1d1d1f;
-  --muted: #6e6e73;
-  --accent: #0071e3;
-  --border: rgba(210, 210, 215, 0.7);
-  
-  /* Semantic Colors */
-  --color-bg-subtle: #fbfbfd;
-  --color-bg-active: rgba(0, 113, 227, 0.1);
-  --color-text-active: #0071e3;
-  --color-danger: #ff3b30;
-  --color-success: #34c759;
-  --color-warning: #ff9f0a;
+/* ═══════════════════════════════════════════════════════
+   DCQ Design Tokens — Apple-Inspired Dark Theme
+   ═══════════════════════════════════════════════════════ */
 
-  /* Spacing */
+:root {
+  /* ── Gray Scale ── */
+  --gray-950: #0D0D0D;
+  --gray-900: #141414;
+  --gray-850: #1A1A1C;
+  --gray-800: #222224;
+  --gray-700: #2C2C2E;
+  --gray-600: #3A3A3C;
+  --gray-500: #48484A;
+  --gray-400: #636366;
+  --gray-300: #86868B;
+  --gray-200: #AEAEB2;
+  --gray-100: #D1D1D6;
+
+  /* ── Surface System ── */
+  --surface-ground: var(--gray-950);
+  --surface-raised: var(--gray-900);
+  --surface-overlay: rgba(20, 20, 20, 0.85);
+  --surface-inset: rgba(0, 0, 0, 0.25);
+  --surface-hover: rgba(255, 255, 255, 0.06);
+  --surface-active: rgba(255, 255, 255, 0.09);
+
+  /* ── Text ── */
+  --text-primary: #F5F5F7;
+  --text-secondary: #86868B;
+  --text-tertiary: #636366;
+  --text-disabled: #48484A;
+
+  /* ── Accent ── */
+  --accent: #0A84FF;
+  --accent-hover: #409CFF;
+  --accent-subtle: rgba(10, 132, 255, 0.15);
+  --accent-glow: rgba(10, 132, 255, 0.4);
+
+  /* ── Semantic ── */
+  --color-success: #32D74B;
+  --color-danger: #FF453A;
+  --color-warning: #FFD60A;
+  --success-subtle: rgba(50, 215, 75, 0.12);
+  --danger-subtle: rgba(255, 69, 58, 0.12);
+  --warning-subtle: rgba(255, 214, 10, 0.12);
+
+  /* ── Borders ── */
+  --border: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.1);
+  --border-subtle: rgba(255, 255, 255, 0.03);
+
+  /* ── Typography ── */
+  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif;
+  --font-mono: "SFMono-Regular", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+
+  --font-size-xs: 10px;
+  --font-size-sm: 11px;
+  --font-size-base: 13px;
+  --font-size-md: 14px;
+  --font-size-lg: 16px;
+  --font-size-xl: 20px;
+
+  /* ── Spacing (4px grid) ── */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
   --space-4: 16px;
-  --space-5: 24px;
-  --space-6: 32px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
 
-  /* Radius */
+  /* ── Radius ── */
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  --radius-md: 8px;
+  --radius-lg: 12px;
   --radius-xl: 16px;
+  --radius-full: 9999px;
 
-  /* Shadows */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  /* ── Shadows ── */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.15);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.25);
+  --shadow-modal: 0 24px 48px rgba(0,0,0,0.6), 0 8px 16px rgba(0,0,0,0.3);
+
+  /* ── Motion ── */
+  --ease-default: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 120ms;
+  --duration-normal: 200ms;
+  --duration-slow: 320ms;
+
+  /* ── Glass ── */
+  --glass-blur: blur(24px) saturate(180%);
+  --glass-blur-heavy: blur(40px) saturate(200%);
+
+  /* ── Z-Index ── */
+  --z-splitter: 20;
+  --z-sidebar: 100;
+  --z-overlay: 1000;
+
+  /* ── Focus ── */
+  --focus-ring: 0 0 0 2px var(--surface-ground), 0 0 0 4px var(--accent);
 }
 
-* {
+/* ── Reset ── */
+*, *::before, *::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif;
-  color: var(--text);
-  background: var(--bg);
+  font-family: var(--font-ui);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  background: var(--surface-ground);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
 }
 
-html,
-body,
-#root {
+html, body, #root {
   height: 100%;
   overflow: hidden;
+}
+
+/* ── Scrollbars ── */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* ── Focus Visible ── */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

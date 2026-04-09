@@ -42,3 +42,62 @@ export type ExamplesIndexResponse = {
   source?: string;
   examples: ExampleItem[];
 };
+
+/* ── Workspace / File System ── */
+
+export type WorkspaceFileInfo = {
+  name: string;
+  path: string;
+  size: number;
+  modified: number;
+};
+
+export type RecentFileEntry = {
+  name: string;
+  path: string;
+  openedAt: number;
+};
+
+export type Project = {
+  name: string;
+  rootPath: string;
+  activeFile: string;
+};
+
+export type RecentProjectEntry = {
+  name: string;
+  rootPath: string;
+  openedAt: number;
+};
+
+/* ── AI Chat ── */
+
+export type AIProviderKey =
+  | "openai"
+  | "anthropic"
+  | "gemini"
+  | "openrouter"
+  | "custom";
+
+export type AISettings = {
+  provider: AIProviderKey;
+  apiKey: string;
+  model: string;
+  baseUrl?: string;
+};
+
+export type ChatRole = "user" | "assistant" | "system";
+
+export type CodeBlock = {
+  code: string;
+  language: string;
+};
+
+export type ChatMessage = {
+  id: string;
+  role: ChatRole;
+  content: string;
+  codeBlocks: CodeBlock[];
+  timestamp: number;
+  isStreaming?: boolean;
+};

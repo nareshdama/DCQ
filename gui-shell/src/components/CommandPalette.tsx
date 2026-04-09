@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useMemo } from "react";
+import { Search, ArrowRight } from "lucide-react";
 
 type Action = {
   id: string;
@@ -59,28 +60,34 @@ export default function CommandPalette({ actions, onClose }: Props) {
   }
 
   return (
-    <div className="paletteBackdrop" onClick={onClose}>
+    <div className="paletteBackdrop" onClick={onClose} role="presentation">
       <div
         className="palette"
+        role="dialog"
+        aria-label="Command palette"
         onClick={(event) => event.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
         <div className="paletteSearch">
+          <Search size={20} color="var(--text-tertiary)" strokeWidth={1.5} aria-hidden="true" />
           <input
             ref={inputRef}
             type="text"
-            placeholder="Type a command or search..."
+            placeholder="Search commands…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search commands"
           />
         </div>
-        <div className="paletteResults">
+        <div className="paletteResults" role="listbox" aria-label="Command results">
           {filteredActions.length === 0 ? (
             <div className="paletteEmpty">No commands found</div>
           ) : (
             filteredActions.map((action, index) => (
               <div
                 key={action.id}
+                role="option"
+                aria-selected={index === selectedIndex}
                 className={`paletteItem ${
                   index === selectedIndex ? "paletteItem--active" : ""
                 }`}
@@ -96,17 +103,24 @@ export default function CommandPalette({ actions, onClose }: Props) {
                   )}
                   {action.title}
                 </div>
-                {action.shortcut && (
+                {action.shortcut ? (
                   <div className="paletteItemShortcut">{action.shortcut}</div>
+                ) : (
+                  <ArrowRight
+                    size={14}
+                    strokeWidth={1.5}
+                    style={{ opacity: index === selectedIndex ? 0.8 : 0 }}
+                    aria-hidden="true"
+                  />
                 )}
               </div>
             ))
           )}
         </div>
         <div className="paletteFooter">
-          <span>↑↓ to navigate</span>
-          <span>↵ to select</span>
-          <span>esc to close</span>
+          <span><kbd>↑</kbd><kbd>↓</kbd> navigate</span>
+          <span><kbd>↵</kbd> select</span>
+          <span><kbd>esc</kbd> close</span>
         </div>
       </div>
     </div>

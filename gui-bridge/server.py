@@ -24,10 +24,18 @@ DEFAULT_UNIT = "mm"
 STL_LINEAR_DEFLECTION_MM = 0.05
 STL_ANGULAR_DEFLECTION_RAD = 0.1
 
+from ai_routes import router as ai_router
+
 app = FastAPI(title="CadQuery GUI Bridge")
+app.include_router(ai_router)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://localhost:4173"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://127.0.0.1:5173",
+        "http://localhost:4173",
+        "http://127.0.0.1:4173",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -42,6 +50,35 @@ class RunRequest(BaseModel):
 
 class ConvertStepRequest(BaseModel):
     stepExportPath: str
+
+
+class WorkspaceOpenRequest(BaseModel):
+    path: str
+
+
+class WorkspaceSaveRequest(BaseModel):
+    path: str
+    code: str
+
+
+class WorkspaceListRequest(BaseModel):
+    root: str
+
+
+class WorkspaceSaveAsRequest(BaseModel):
+    directory: str
+    name: str
+    code: str
+
+
+class CreateProjectRequest(BaseModel):
+    name: str
+    parentDir: str | None = None
+
+
+class RenameProjectRequest(BaseModel):
+    currentPath: str
+    newName: str
 
 
 EXAMPLES_DIR = PROJECT_ROOT / "example-library" / "cadquery-docs"
@@ -255,3 +292,149 @@ async def convert_step_upload(file: UploadFile = File(...)) -> dict[str, str]:
         raise HTTPException(
             status_code=500, detail=f"STEP upload conversion failed: {exc}"
         )
+
+
+WORKSPACE_ALLOWED_ROOTS: list[Path] = [PROJECT_ROOT, Path.home()]
+
+
+def _validate_workspace_path(target: Path) -> Path:
+    resolved = target.resolve()
+    for allowed_root in WORKSPACE_ALLOWED_ROOTS:
+        try:
+            resolved.relative_to(allowed_root.resolve())
+            return resolved
+        except ValueError:
+            continue
+    raise HTTPException(
+        status_code=403,
+        detail="Access denied: path is outside allowed workspace roots",
+    )
+
+
+@app.post("/workspace/open")
+def workspace_open(payload: WorkspaceOpenRequest) -> dict[str, str]:
+    target = _validate_workspace_path(Path(payload.path))
+    if not target.exists():
+        raise HTTPException(status_code=404, detail="File not found")
+    if not target.is_file():
+        raise HTTPException(status_code=400, detail="Path is not a file")
+    try:
+        code = target.read_text(encoding="utf-8")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to read file: {exc}")
+    return {"code": code, "path": str(target), "name": target.name}
+
+
+@app.post("/workspace/save")
+def workspace_save(payload: WorkspaceSaveRequest) -> dict[str, str]:
+    target = _validate_workspace_path(Path(payload.path))
+    try:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(payload.code, encoding="utf-8")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {exc}")
+    return {"path": str(target), "name": target.name}
+
+
+@app.post("/workspace/list")
+def workspace_list(payload: WorkspaceListRequest) -> dict[str, Any]:
+    root = _validate_workspace_path(Path(payload.root))
+    if not root.exists() or not root.is_dir():
+        raise HTTPException(status_code=404, detail="Directory not found")
+    files = []
+    for entry in sorted(root.iterdir()):
+        if entry.is_file() and entry.suffix.lower() == ".py":
+            stat = entry.stat()
+            files.append(
+                {
+                    "name": entry.name,
+                    "path": str(entry),
+                    "size": stat.st_size,
+                    "modified": stat.st_mtime,
+                }
+            )
+    return {"root": str(root), "files": files}
+
+
+@app.post("/workspace/save-as")
+def workspace_save_as(payload: WorkspaceSaveAsRequest) -> dict[str, str]:
+    directory = _validate_workspace_path(Path(payload.directory))
+    if not directory.exists():
+        raise HTTPException(status_code=404, detail="Directory not found")
+    name = payload.name if payload.name.endswith(".py") else f"{payload.name}.py"
+    target = directory / name
+    _validate_workspace_path(target)
+    try:
+        target.write_text(payload.code, encoding="utf-8")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to save file: {exc}")
+    return {"path": str(target), "name": target.name}
+
+
+DCQ_PROJECTS_DIR = Path.home() / "DCQ-Projects"
+
+
+@app.post("/workspace/create-project")
+def workspace_create_project(payload: CreateProjectRequest) -> dict[str, str]:
+    parent = Path(payload.parentDir) if payload.parentDir else DCQ_PROJECTS_DIR
+    parent = _validate_workspace_path(parent)
+    parent.mkdir(parents=True, exist_ok=True)
+
+    safe_name = re.sub(r'[<>:"/\\|?*]', "_", payload.name).strip()
+    if not safe_name:
+        raise HTTPException(status_code=400, detail="Invalid project name")
+
+    project_dir = parent / safe_name
+    if project_dir.exists():
+        raise HTTPException(status_code=409, detail="A project with this name already exists")
+
+    try:
+        project_dir.mkdir(parents=True)
+        starter_file = project_dir / "main.py"
+        starter_code = (
+            'import cadquery as cq\n\n'
+            'result = (\n'
+            '    cq.Workplane("XY")\n'
+            '    .box(80, 50, 20)\n'
+            '    .edges("|Z")\n'
+            '    .fillet(3)\n'
+            ')\n'
+        )
+        starter_file.write_text(starter_code, encoding="utf-8")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to create project: {exc}")
+
+    return {
+        "rootPath": str(project_dir),
+        "name": safe_name,
+        "starterFile": str(starter_file),
+        "starterCode": starter_code,
+    }
+
+
+@app.post("/workspace/rename-project")
+def workspace_rename_project(payload: RenameProjectRequest) -> dict[str, str]:
+    current = _validate_workspace_path(Path(payload.currentPath))
+    if not current.exists() or not current.is_dir():
+        raise HTTPException(status_code=404, detail="Project directory not found")
+
+    safe_name = re.sub(r'[<>:"/\\|?*]', "_", payload.newName).strip()
+    if not safe_name:
+        raise HTTPException(status_code=400, detail="Invalid project name")
+
+    new_path = current.parent / safe_name
+    if new_path.exists():
+        raise HTTPException(status_code=409, detail="A folder with this name already exists")
+
+    try:
+        current.rename(new_path)
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Failed to rename project: {exc}")
+
+    return {"rootPath": str(new_path), "name": safe_name}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    uvicorn.run("server:app", host="127.0.0.1", port=8008, reload=False)

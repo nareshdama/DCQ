@@ -14,11 +14,12 @@ export default function PanelPlaceholder({
     .join(" ");
 
   return (
-    <section className={panelClassName}>
+    <section className={panelClassName} aria-busy="true" aria-label={title}>
       <div className="panelHeader">
         <h3>{title}</h3>
       </div>
       <div className="panelPlaceholderBody">
+        <div className="shimmer" aria-hidden="true" />
         <p className="muted">{description}</p>
       </div>
     </section>

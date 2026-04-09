@@ -34,6 +34,28 @@ export default defineConfig({
     }
   },
   server: {
-    port: 5173
+    port: 5173,
+    proxy: {
+      "/run": { target: "http://127.0.0.1:8008", changeOrigin: true },
+      "/health": { target: "http://127.0.0.1:8008", changeOrigin: true },
+      "/examples": { target: "http://127.0.0.1:8008", changeOrigin: true },
+      "/exports": { target: "http://127.0.0.1:8008", changeOrigin: true },
+      "/convert-step-export": {
+        target: "http://127.0.0.1:8008",
+        changeOrigin: true
+      },
+      "/convert-step-upload": {
+        target: "http://127.0.0.1:8008",
+        changeOrigin: true
+      },
+      "/ai": {
+        target: "http://127.0.0.1:8008",
+        changeOrigin: true
+      },
+      "/workspace": {
+        target: "http://127.0.0.1:8008",
+        changeOrigin: true
+      }
+    }
   }
 });

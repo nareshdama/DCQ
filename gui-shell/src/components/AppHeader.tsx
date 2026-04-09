@@ -1,51 +1,36 @@
-import type { UiStatus } from "../types";
+import { ChevronRight } from "lucide-react";
 
 type Props = {
-  compactMode: boolean;
-  liveMode: boolean;
-  onExport: () => void;
-  onRun: () => void;
-  onToggleCompactMode: () => void;
-  onToggleLiveMode: () => void;
-  onTogglePalette: () => void;
-  status: UiStatus;
+  projectName: string | null;
+  fileName: string;
+  isDirty: boolean;
 };
 
 export default function AppHeader({
-  compactMode,
-  liveMode,
-  onExport,
-  onRun,
-  onToggleCompactMode,
-  onToggleLiveMode,
-  onTogglePalette,
-  status,
+  projectName,
+  fileName,
+  isDirty,
 }: Props) {
   return (
     <header className="topBar">
       <div className="titleBlock">
         <div className="titleRow">
           <h1>DCQ.io</h1>
-          <span className={`statusPill statusPill--${status.tone}`}>{status.label}</span>
+
+          <div className="breadcrumb">
+            {projectName ? (
+              <>
+                <span className="breadcrumbProject">{projectName}</span>
+                <ChevronRight size={12} strokeWidth={2} className="breadcrumbSep" />
+              </>
+            ) : null}
+            <span className="breadcrumbFile">
+              {isDirty ? <span className="dirtyDot" /> : null}
+              {fileName}
+            </span>
+          </div>
         </div>
-        <p className="muted">Code-first mechanical modeling workspace</p>
-      </div>
-      <div className="topBarActions">
-        <button type="button" onClick={onToggleLiveMode}>
-          {liveMode ? "Live: On" : "Live: Off"}
-        </button>
-        <button type="button" onClick={onToggleCompactMode}>
-          {compactMode ? "Density: Compact" : "Density: Cozy"}
-        </button>
-        <button type="button" onClick={onTogglePalette}>
-          Command
-        </button>
-        <button type="button" className="btnPrimary" onClick={onRun}>
-          Run
-        </button>
-        <button type="button" onClick={onExport}>
-          Export
-        </button>
+        <p className="muted">Code-first CAD workspace</p>
       </div>
     </header>
   );

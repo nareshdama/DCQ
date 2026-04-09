@@ -1,0 +1,632 @@
+/* ═══════════════════════════════════════════════════════
+   Preview Panel & Inspector Styles
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Preview Shell ── */
+.previewShell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.previewHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  min-height: 40px;
+  flex-shrink: 0;
+}
+
+.previewTitleBlock {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.previewTitleBlock h3 {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.previewTitleMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.rendererBadge {
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  font-weight: 500;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+}
+
+.previewHeaderMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.previewHeaderMeta button {
+  background: transparent;
+  border: 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  transition: all var(--duration-fast);
+}
+
+.previewHeaderMeta button:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+/* ── Viewport Toolbar ── */
+.viewportToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-1) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-ground);
+  min-height: 32px;
+  flex-shrink: 0;
+}
+
+.viewportToolbarGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.viewportToolbarGroup button {
+  background: transparent;
+  border: 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-sm);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.viewportToolbarGroup button:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.filePicker {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast);
+}
+
+.filePicker:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.filePicker input[type="file"] {
+  display: none;
+}
+
+/* ── Preview Workspace ── */
+.previewWorkspace {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.previewWorkspace--inspector {
+  display: grid;
+  grid-template-columns: 1fr 1px var(--preview-inspector, 280px);
+}
+
+/* ── 3D Viewport ── */
+.previewStage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.previewBody {
+  flex: 1;
+  position: relative;
+  min-height: 0;
+}
+
+.threeViewport {
+  position: absolute;
+  inset: 0;
+  contain: strict;
+}
+
+.threeViewport canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.previewOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(4px);
+  z-index: var(--z-splitter);
+}
+
+.previewOverlay p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-md);
+}
+
+.emptyState p {
+  color: var(--text-tertiary);
+  font-size: var(--font-size-base);
+}
+
+.diagnostics {
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--font-size-sm);
+  font-family: var(--font-mono);
+  color: var(--color-danger);
+  background: var(--danger-subtle);
+  border-top: 1px solid rgba(255, 69, 58, 0.2);
+}
+
+/* ── Inspector Splitter ── */
+.previewInspectorSplitter {
+  width: 9px;
+  margin-left: -4px;
+  margin-right: -4px;
+  cursor: col-resize;
+  background: transparent;
+  z-index: var(--z-splitter);
+  position: relative;
+}
+
+.previewInspectorSplitter::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 24px;
+  border-radius: var(--radius-full);
+  background: transparent;
+  transition: background var(--duration-normal);
+}
+
+.previewInspectorSplitter:hover::after {
+  background: var(--accent);
+  opacity: 0.5;
+}
+
+/* ── Inspector Panel ── */
+.previewInspector {
+  background: var(--surface-ground);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.inspectorTabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-1) var(--space-2);
+  gap: 1px;
+  background: var(--surface-ground);
+  flex-shrink: 0;
+}
+
+.inspectorTab {
+  flex: 1;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--text-tertiary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.inspectorTab:hover {
+  color: var(--text-secondary);
+  background: var(--surface-hover);
+}
+
+.inspectorTab--active {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.previewInspectorBody {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-3);
+}
+
+.previewInspectorSection {
+  margin-bottom: var(--space-4);
+}
+
+.previewInspectorLabel {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: var(--space-2);
+  padding: 0 var(--space-1);
+}
+
+/* ── Inspector Info Rows ── */
+.inspectorInfoRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.inspectorInfoRow span:first-child {
+  color: var(--text-secondary);
+}
+
+.inspectorInfoValue {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  background: var(--surface-inset);
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+/* ── Inspector Controls ── */
+.previewColorField {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--duration-fast);
+}
+
+.previewColorField:hover {
+  background: var(--surface-hover);
+}
+
+.previewColorField span {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.previewColorField input[type="color"] {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+}
+
+.previewColorField input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+.previewColorField input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 3px;
+}
+
+.previewRangeField {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-1) var(--space-2);
+  gap: var(--space-3);
+}
+
+.previewRangeField span {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  min-width: 60px;
+}
+
+.previewRangeField input[type="range"] {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--gray-700);
+  border-radius: var(--radius-full);
+  outline: none;
+}
+
+.previewRangeField input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  background: var(--text-primary);
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.previewRangeField input[type="range"]:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.previewToggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--duration-fast);
+}
+
+.previewToggle:hover {
+  background: var(--surface-hover);
+}
+
+.previewToggle span {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.previewToggle input[type="checkbox"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--border-strong);
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+  transition: all var(--duration-fast);
+}
+
+.previewToggle input[type="checkbox"]:checked {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.previewToggle input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0px;
+  width: 6px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* ── Export Links ── */
+.exportTabLinks {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.exportActionLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  transition: background var(--duration-fast);
+}
+
+.exportActionLink:hover {
+  background: var(--accent-hover);
+}
+
+/* ── Toolbar Divider ── */
+.toolbarDivider {
+  width: 1px;
+  height: 16px;
+  background: var(--border);
+  margin: 0 var(--space-1);
+  flex-shrink: 0;
+}
+
+/* ── Viewport Toggle Buttons ── */
+.vpToggleBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+  white-space: nowrap;
+}
+
+.vpToggleBtn:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+.vpToggleBtn--active {
+  color: var(--accent);
+  background: var(--accent-subtle);
+}
+
+.vpToggleBtn--active:hover {
+  color: var(--accent);
+  background: rgba(10, 132, 255, 0.2);
+}
+
+/* ── Fit Button ── */
+.vpFitBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  padding: 3px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+  white-space: nowrap;
+}
+
+.vpFitBtn:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+/* ── Camera Preset Buttons ── */
+.viewportToolbarGroup--camera {
+  display: flex;
+  gap: 2px;
+  background: var(--surface-inset);
+  padding: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.viewportToolbarGroup--camera button {
+  background: transparent;
+  border: 0;
+  color: var(--text-tertiary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  min-width: 22px;
+  text-align: center;
+  transition: all var(--duration-fast);
+}
+
+.viewportToolbarGroup--camera button:hover {
+  color: var(--text-primary);
+  background: var(--surface-hover);
+}
+
+/* ── Orientation Gizmo ── */
+.vpOrientationGizmo {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  width: 64px;
+  height: 64px;
+  pointer-events: none;
+  opacity: 0.7;
+  z-index: 5;
+}
+
+/* ── Viewport Status Bar ── */
+.vpStatusBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2px var(--space-3);
+  font-size: var(--font-size-xs);
+  font-family: var(--font-mono);
+  color: var(--text-tertiary);
+  background: var(--surface-inset);
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+  min-height: 24px;
+  gap: var(--space-4);
+}
+
+.vpStatusGroup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.vpStatusItem {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+  color: var(--text-tertiary);
+}
+
+.vpStatusItem--muted {
+  color: var(--text-disabled);
+}
+
+.vpStatusItem--coords {
+  font-variant-numeric: tabular-nums;
+  gap: 2px;
+}
+
+.vpStatusItem--badge {
+  padding: 0 4px;
+  background: var(--accent-subtle);
+  color: var(--accent);
+  border-radius: 3px;
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+}
+
+.vpStatusDivider {
+  width: 1px;
+  height: 12px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.vpCoordLabel {
+  font-weight: 700;
+  font-size: 9px;
+  margin-left: 4px;
+  margin-right: 1px;
+}
+
+.vpCoordLabel--x { color: #FF453A; }
+.vpCoordLabel--y { color: #32D74B; }
+.vpCoordLabel--z { color: #0A84FF; }

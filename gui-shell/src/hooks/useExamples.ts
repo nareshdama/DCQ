@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getExampleCode, getExamplesIndex } from "../api";
 import type { ExampleItem } from "../types";
 
@@ -8,11 +8,15 @@ function sanitizeExampleTitle(title: string, file: string) {
   return cleaned || fallback;
 }
 
-export function useExamples() {
+export function useExamples(active = false) {
   const [examples, setExamples] = useState<ExampleItem[]>([]);
   const [selectedExampleFile, setSelectedExampleFile] = useState("");
+  const fetchedRef = useRef(false);
 
   useEffect(() => {
+    if (!active || fetchedRef.current) return;
+    fetchedRef.current = true;
+
     let cancelled = false;
 
     void (async () => {
@@ -37,7 +41,7 @@ export function useExamples() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [active]);
 
   const loadSelectedExample = useCallback(async (fileName?: string) => {
     const targetFile = fileName ?? selectedExampleFile;

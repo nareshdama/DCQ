@@ -16,40 +16,76 @@ type Props = {
 const editorTheme = EditorView.theme({
   "&": {
     height: "100%",
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
+    color: "#E2E2E6",
   },
   ".cm-scroller": {
-    fontFamily: '"Cascadia Code", Consolas, monospace',
-    lineHeight: "1.55"
+    fontFamily: '"SFMono-Regular", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace',
+    lineHeight: "1.65",
   },
   ".cm-content": {
     fontSize: "13px",
-    padding: "16px"
+    padding: "12px 16px",
+    caretColor: "#0A84FF",
   },
   ".cm-gutters": {
-    backgroundColor: "rgba(246, 246, 249, 0.96)",
-    borderRight: "1px solid rgba(210, 210, 215, 0.7)",
-    color: "#8a8a92"
+    backgroundColor: "transparent",
+    borderRight: "1px solid rgba(255, 255, 255, 0.04)",
+    color: "#48484A",
+    paddingRight: "8px",
   },
   ".cm-activeLine": {
-    backgroundColor: "rgba(0, 113, 227, 0.06)"
+    backgroundColor: "rgba(255, 255, 255, 0.02)",
   },
   ".cm-activeLineGutter": {
-    backgroundColor: "rgba(0, 113, 227, 0.1)"
+    backgroundColor: "rgba(255, 255, 255, 0.04)",
+    color: "#86868B",
   },
   ".cm-focused": {
-    outline: "none"
+    outline: "none",
+  },
+  ".cm-cursor": {
+    borderLeftColor: "#0A84FF",
+    borderLeftWidth: "2px",
   },
   ".cm-selectionBackground, ::selection": {
-    backgroundColor: "rgba(10, 132, 255, 0.22) !important"
+    backgroundColor: "rgba(10, 132, 255, 0.25) !important",
+  },
+  ".cm-focused .cm-selectionBackground": {
+    backgroundColor: "rgba(10, 132, 255, 0.3) !important",
+  },
+  ".cm-matchingBracket": {
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    outline: "1px solid rgba(255, 255, 255, 0.15)",
+  },
+  ".cm-tooltip": {
+    backgroundColor: "rgba(20, 20, 20, 0.95)",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    borderRadius: "8px",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
+    color: "#F5F5F7",
   },
   ".cm-tooltip.cm-tooltip-lint": {
-    borderRadius: "12px",
-    border: "1px solid rgba(210, 210, 215, 0.9)",
-    backgroundColor: "rgba(255, 255, 255, 0.98)",
-    boxShadow: "0 12px 28px rgba(0, 0, 0, 0.12)"
-  }
-});
+    borderRadius: "8px",
+    border: "1px solid rgba(255, 69, 58, 0.3)",
+    backgroundColor: "rgba(20, 20, 20, 0.95)",
+    boxShadow: "0 8px 24px rgba(0, 0, 0, 0.5)",
+    color: "#F5F5F7",
+  },
+  ".cm-tooltip-autocomplete": {
+    borderRadius: "8px",
+  },
+  ".cm-tooltip-autocomplete > ul > li[aria-selected]": {
+    backgroundColor: "rgba(10, 132, 255, 0.2)",
+    color: "#F5F5F7",
+  },
+  ".cm-foldGutter span": {
+    color: "#48484A",
+  },
+  ".cm-foldGutter span:hover": {
+    color: "#86868B",
+  },
+}, { dark: true });
 
 export default function CodeEditor({
   value,

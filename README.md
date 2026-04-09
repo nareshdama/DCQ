@@ -37,13 +37,13 @@ Inspired by Apple-style visual discipline, DCQ aims to be a calm, fast, and keyb
 ### Backend Setup (`gui-bridge`)
 1. Navigate to `gui-bridge/`.
 2. Install dependencies: `pip install -r requirements.txt`.
-3. Start the server: `python server.py`. (Defaults to `http://localhost:8008`).
+3. Start the server from `gui-bridge/`: `python server.py` or `python -m uvicorn server:app --host 127.0.0.1 --port 8008` (or use `start-hybrid-gui.ps1` from the repo root). Defaults to `http://127.0.0.1:8008`.
 
 ### Frontend Setup (`gui-shell`)
 1. Navigate to `gui-shell/`.
 2. Install dependencies: `npm install`.
 3. Start development server: `npm run dev`.
-4. Open your browser to the local Vite URL (typically `http://localhost:5173`).
+4. Open your browser to the local Vite URL (typically `http://localhost:5173`). With the bridge running on port 8008, API calls are proxied in dev (no extra CORS setup). Override with `VITE_API_BASE_URL` if needed.
 
 ## 🗺️ Roadmap
 

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type InitialValue<T> = T | (() => T);
 type Options<T> = {
@@ -18,8 +18,12 @@ export function usePersistentState<T>(
   initialValue: InitialValue<T>,
   options: Options<T> = {}
 ) {
-  const deserialize = options.deserialize ?? defaultDeserialize<T>;
-  const serialize = options.serialize ?? defaultSerialize<T>;
+  const serializeRef = useRef(options.serialize ?? defaultSerialize<T>);
+  serializeRef.current = options.serialize ?? defaultSerialize<T>;
+
+  const deserializeRef = useRef(options.deserialize ?? defaultDeserialize<T>);
+  deserializeRef.current = options.deserialize ?? defaultDeserialize<T>;
+
   const [value, setValue] = useState<T>(() => {
     const fallback = resolveInitialValue(initialValue);
     if (typeof window === "undefined") {
@@ -32,7 +36,7 @@ export function usePersistentState<T>(
     }
 
     try {
-      return deserialize(savedValue);
+      return deserializeRef.current(savedValue);
     } catch {
       return fallback;
     }
@@ -42,8 +46,8 @@ export function usePersistentState<T>(
     if (typeof window === "undefined") {
       return;
     }
-    window.localStorage.setItem(key, serialize(value));
-  }, [key, serialize, value]);
+    window.localStorage.setItem(key, serializeRef.current(value));
+  }, [key, value]);
 
   return [value, setValue] as const;
 }

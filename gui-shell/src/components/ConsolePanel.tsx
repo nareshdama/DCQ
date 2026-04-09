@@ -1,5 +1,6 @@
-import { useEffect, useRef, useState } from "react";
-import type { Diagnostic, UiStatus } from "../types";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Trash2, X, AlertTriangle, FileText, Copy, Check } from "lucide-react";
+import type { Diagnostic } from "../types";
 
 const CONSOLE_TAB_STORAGE_KEY = "cq-console-tab-v1";
 
@@ -7,7 +8,6 @@ type ConsoleTab = "problems" | "output";
 
 type Props = {
   height: number;
-  status: UiStatus;
   diagnostics: Diagnostic[];
   stdout?: string;
   stderr?: string;
@@ -18,7 +18,6 @@ type Props = {
 
 export default function ConsolePanel({
   height,
-  status,
   diagnostics,
   stdout,
   stderr,
@@ -39,6 +38,21 @@ export default function ConsolePanel({
     return saved === "output" ? "output" : "problems";
   });
   const previousProblemCountRef = useRef(problemsCount);
+  const [copied, setCopied] = useState(false);
+
+  const copyConsoleContent = useCallback(() => {
+    let text = "";
+    if (activeTab === "problems") {
+      const diagLines = diagnostics.map((d) => `Line ${d.line}: ${d.message}`);
+      text = [...diagLines, stderr ?? ""].filter(Boolean).join("\n");
+    } else {
+      text = stdout ?? "";
+    }
+    void navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }, [activeTab, diagnostics, stderr, stdout]);
 
   useEffect(() => {
     window.localStorage.setItem(CONSOLE_TAB_STORAGE_KEY, activeTab);
@@ -71,7 +85,8 @@ export default function ConsolePanel({
               }`}
               onClick={() => setActiveTab("problems")}
             >
-              {`Problems (${problemsCount})`}
+              <AlertTriangle size={11} strokeWidth={2} />
+              {` Problems (${problemsCount})`}
             </button>
             <button
               type="button"
@@ -84,19 +99,36 @@ export default function ConsolePanel({
               }`}
               onClick={() => setActiveTab("output")}
             >
-              {`Output (${outputCount})`}
+              <FileText size={11} strokeWidth={2} />
+              {` Output (${outputCount})`}
             </button>
           </div>
         </div>
         <div className="consoleHeaderActions">
-          <span className={`statusPill statusPill--compact statusPill--${status.tone}`}>
-            {status.label}
-          </span>
-          <button type="button" onClick={onClear} disabled={!canClear}>
-            Clear
+          <button
+            type="button"
+            onClick={copyConsoleContent}
+            title="Copy to clipboard"
+            aria-label="Copy console output"
+          >
+            {copied ? <Check size={13} strokeWidth={1.5} /> : <Copy size={13} strokeWidth={1.5} />}
           </button>
-          <button type="button" onClick={onHide}>
-            Hide
+          <button
+            type="button"
+            onClick={onClear}
+            disabled={!canClear}
+            title="Clear console"
+            aria-label="Clear console"
+          >
+            <Trash2 size={13} strokeWidth={1.5} />
+          </button>
+          <button
+            type="button"
+            onClick={onHide}
+            title="Hide console"
+            aria-label="Hide console"
+          >
+            <X size={13} strokeWidth={1.5} />
           </button>
         </div>
       </div>
