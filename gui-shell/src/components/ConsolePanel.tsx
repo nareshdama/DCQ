@@ -18,7 +18,6 @@ type Props = {
 
 export default function ConsolePanel({
   height,
-  status,
   diagnostics,
   stdout,
   stderr,
@@ -59,7 +58,6 @@ export default function ConsolePanel({
     <section className="panel consoleShell paneSection paneSection--console" style={{ height }}>
       <div className="panelHeader">
         <div className="consoleHeaderTitle">
-          <h3>Console</h3>
           <div className="consoleTabs" role="tablist" aria-label="Console views">
             <button
               type="button"
@@ -72,7 +70,12 @@ export default function ConsolePanel({
               }`}
               onClick={() => setActiveTab("problems")}
             >
-              {`Problems (${problemsCount})`}
+              {problemsCount > 0 ? (
+                <svg width="10" height="10" viewBox="0 0 10 10" style={{ marginRight: 4 }}>
+                  <circle cx="5" cy="5" r="4" fill={problemsCount > 0 ? "#ef4444" : "transparent"} />
+                </svg>
+              ) : null}
+              {`Problems${problemsCount > 0 ? ` (${problemsCount})` : ""}`}
             </button>
             <button
               type="button"
@@ -85,19 +88,21 @@ export default function ConsolePanel({
               }`}
               onClick={() => setActiveTab("output")}
             >
-              {`Output (${outputCount})`}
+              {`Output${outputCount > 0 ? ` (${outputCount})` : ""}`}
             </button>
           </div>
         </div>
         <div className="consoleHeaderActions">
-          <span className={`statusPill statusPill--compact statusPill--${status.tone}`}>
-            {status.label}
-          </span>
-          <button type="button" onClick={onClear} disabled={!canClear}>
-            Clear
+          <button type="button" onClick={onClear} disabled={!canClear} title="Clear console">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
+              <line x1="2" y1="2" x2="10" y2="10" />
+              <line x1="10" y1="2" x2="2" y2="10" />
+            </svg>
           </button>
-          <button type="button" onClick={onHide}>
-            Hide
+          <button type="button" onClick={onHide} title="Hide console">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
+              <polyline points="2 4 6 8 10 4" />
+            </svg>
           </button>
         </div>
       </div>
@@ -110,7 +115,7 @@ export default function ConsolePanel({
             className="consoleSection"
           >
             {problemsCount === 0 ? (
-              <p className="muted">No problems in the latest run.</p>
+              <p className="muted">No problems detected.</p>
             ) : (
               <>
                 {hasDiagnostics ? (
@@ -122,7 +127,8 @@ export default function ConsolePanel({
                           key={`${diagnostic.line}-${index}`}
                           className="consoleEntry consoleEntry--error"
                         >
-                          {`Line ${diagnostic.line}: ${diagnostic.message}`}
+                          <span style={{ opacity: 0.6 }}>{`Ln ${diagnostic.line}`}</span>
+                          {` ${diagnostic.message}`}
                         </div>
                       ))}
                     </div>
@@ -146,7 +152,7 @@ export default function ConsolePanel({
           >
             {hasStdout ? (
               <>
-                <div className="consoleLabel">Output</div>
+                <div className="consoleLabel">stdout</div>
                 <pre className="consoleBlock">{stdout}</pre>
               </>
             ) : (

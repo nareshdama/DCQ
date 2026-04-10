@@ -1,125 +1,119 @@
-/* ═══════════════════════════════════════════════════════
-   DCQ Design Tokens — Apple-Inspired Dark Theme
-   ═══════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   DCQ.io Design Tokens — Dark CAD/IDE Theme
+   Inspired by Fusion 360, SolidWorks, VS Code, Blender
+   ═══════════════════════════════════════════════════════════════ */
 
 :root {
-  /* ── Gray Scale ── */
-  --gray-950: #0D0D0D;
-  --gray-900: #141414;
-  --gray-850: #1A1A1C;
-  --gray-800: #222224;
-  --gray-700: #2C2C2E;
-  --gray-600: #3A3A3C;
-  --gray-500: #48484A;
-  --gray-400: #636366;
-  --gray-300: #86868B;
-  --gray-200: #AEAEB2;
-  --gray-100: #D1D1D6;
+  /* ── Core Palette ── */
+  --bg-deep:    #0d0e12;
+  --bg-base:    #13141a;
+  --bg-surface: #1a1b23;
+  --bg-raised:  #21222d;
+  --bg-overlay: #282a36;
+  --bg-hover:   #2c2e3a;
+  --bg-active:  #33354a;
 
-  /* ── Surface System ── */
-  --surface-ground: var(--gray-950);
-  --surface-raised: var(--gray-900);
-  --surface-overlay: rgba(20, 20, 20, 0.85);
-  --surface-inset: rgba(0, 0, 0, 0.25);
-  --surface-hover: rgba(255, 255, 255, 0.06);
-  --surface-active: rgba(255, 255, 255, 0.09);
+  /* ── Panel / Chrome ── */
+  --panel:         #1a1b23;
+  --panel-header:  #16171f;
+  --panel-alt:     #1e1f28;
 
   /* ── Text ── */
-  --text-primary: #F5F5F7;
-  --text-secondary: #86868B;
-  --text-tertiary: #636366;
-  --text-disabled: #48484A;
+  --text:          #e2e4ea;
+  --text-secondary:#9da1b0;
+  --text-muted:    #6b6f7e;
+  --text-disabled: #4a4d5a;
+  --text-inverse:  #0d0e12;
 
-  /* ── Accent ── */
-  --accent: #0A84FF;
-  --accent-hover: #409CFF;
-  --accent-subtle: rgba(10, 132, 255, 0.15);
-  --accent-glow: rgba(10, 132, 255, 0.4);
+  /* ── Accent / Brand ── */
+  --accent:        #3b8eed;
+  --accent-hover:  #549ef5;
+  --accent-muted:  rgba(59, 142, 237, 0.15);
+  --accent-strong: #2a7de0;
+
+  /* ── CAD Accents ── */
+  --cad-cyan:      #56d4c8;
+  --cad-green:     #4ade80;
+  --cad-orange:    #f59e0b;
+  --cad-red:       #ef4444;
+  --cad-purple:    #a78bfa;
+  --cad-yellow:    #fbbf24;
 
   /* ── Semantic ── */
-  --color-success: #32D74B;
-  --color-danger: #FF453A;
-  --color-warning: #FFD60A;
-  --success-subtle: rgba(50, 215, 75, 0.12);
-  --danger-subtle: rgba(255, 69, 58, 0.12);
-  --warning-subtle: rgba(255, 214, 10, 0.12);
+  --color-danger:    #ef4444;
+  --color-danger-bg: rgba(239, 68, 68, 0.12);
+  --color-success:   #4ade80;
+  --color-success-bg:rgba(74, 222, 128, 0.12);
+  --color-warning:   #f59e0b;
+  --color-warning-bg:rgba(245, 158, 11, 0.12);
+  --color-info:      #3b8eed;
+  --color-info-bg:   rgba(59, 142, 237, 0.12);
 
   /* ── Borders ── */
-  --border: rgba(255, 255, 255, 0.06);
-  --border-strong: rgba(255, 255, 255, 0.1);
-  --border-subtle: rgba(255, 255, 255, 0.03);
+  --border:        rgba(255, 255, 255, 0.06);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+  --border-strong: rgba(255, 255, 255, 0.10);
+  --border-accent: rgba(59, 142, 237, 0.4);
 
-  /* ── Typography ── */
-  --font-ui: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", sans-serif;
-  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Segoe UI", sans-serif;
-  --font-mono: "SFMono-Regular", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
-
-  --font-size-xs: 10px;
-  --font-size-sm: 11px;
-  --font-size-base: 13px;
-  --font-size-md: 14px;
-  --font-size-lg: 16px;
-  --font-size-xl: 20px;
-
-  /* ── Spacing (4px grid) ── */
+  /* ── Spacing ── */
   --space-1: 4px;
-  --space-2: 8px;
-  --space-3: 12px;
-  --space-4: 16px;
-  --space-5: 20px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 12px;
+  --space-5: 16px;
   --space-6: 24px;
-  --space-8: 32px;
-  --space-10: 40px;
-  --space-12: 48px;
+  --space-7: 32px;
 
   /* ── Radius ── */
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
-  --radius-full: 9999px;
+  --radius-xs: 3px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
 
   /* ── Shadows ── */
-  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3), 0 1px 3px rgba(0,0,0,0.15);
-  --shadow-md: 0 4px 12px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.2);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.25);
-  --shadow-modal: 0 24px 48px rgba(0,0,0,0.6), 0 8px 16px rgba(0,0,0,0.3);
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-md:  0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-lg:  0 8px 30px rgba(0, 0, 0, 0.6);
+  --shadow-glow:0 0 20px rgba(59, 142, 237, 0.15);
 
-  /* ── Motion ── */
-  --ease-default: cubic-bezier(0.2, 0.8, 0.2, 1);
-  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* ── Typography ── */
+  --font-sans:  "Inter", "Segoe UI", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:  "Cascadia Code", "JetBrains Mono", "Fira Code", "Consolas", monospace;
+  --font-size-xs:  10px;
+  --font-size-sm:  11px;
+  --font-size-base:12px;
+  --font-size-md:  13px;
+  --font-size-lg:  14px;
+
+  /* ── Z-layers ── */
+  --z-sidebar:    100;
+  --z-toolbar:    50;
+  --z-overlay:    200;
+  --z-palette:    1000;
+  --z-tooltip:    1100;
+
+  /* ── Transitions ── */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --duration-fast: 120ms;
   --duration-normal: 200ms;
-  --duration-slow: 320ms;
-
-  /* ── Glass ── */
-  --glass-blur: blur(24px) saturate(180%);
-  --glass-blur-heavy: blur(40px) saturate(200%);
-
-  /* ── Z-Index ── */
-  --z-splitter: 20;
-  --z-sidebar: 100;
-  --z-overlay: 1000;
-
-  /* ── Focus ── */
-  --focus-ring: 0 0 0 2px var(--surface-ground), 0 0 0 4px var(--accent);
 }
 
 /* ── Reset ── */
-*, *::before, *::after {
+* {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
 body {
-  font-family: var(--font-ui);
+  font-family: var(--font-sans);
   font-size: var(--font-size-base);
-  color: var(--text-primary);
-  background: var(--surface-ground);
+  color: var(--text);
+  background: var(--bg-deep);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 html, body, #root {
@@ -127,7 +121,7 @@ html, body, #root {
   overflow: hidden;
 }
 
-/* ── Scrollbars ── */
+/* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -136,28 +130,24 @@ html, body, #root {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-full);
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  background: rgba(255, 255, 255, 0.10);
+  border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid transparent;
-  background-clip: padding-box;
+  background: rgba(255, 255, 255, 0.18);
+}
+::-webkit-scrollbar-corner {
+  background: transparent;
 }
 
-/* ── Focus Visible ── */
+/* ── Focus Ring ── */
 :focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
 }
 
-/* ── Reduced Motion ── */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+/* ── Selection ── */
+::selection {
+  background: rgba(59, 142, 237, 0.3);
+  color: #fff;
 }

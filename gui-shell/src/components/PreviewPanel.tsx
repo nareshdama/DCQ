@@ -192,10 +192,10 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
   const [ambientIntensity, setAmbientIntensity] = useState(0.68);
   const [keyIntensity, setKeyIntensity] = useState(1.0);
   const [fillIntensity, setFillIntensity] = useState(0.32);
-  const [bgColor, setBgColor] = useState("#f8f8fa");
-  const [matColor, setMatColor] = useState("#9ca3af");
-  const [metalness, setMetalness] = useState(0.12);
-  const [roughness, setRoughness] = useState(0.62);
+  const [bgColor, setBgColor] = useState("#16171f");
+  const [matColor, setMatColor] = useState("#7c8594");
+  const [metalness, setMetalness] = useState(0.18);
+  const [roughness, setRoughness] = useState(0.55);
   const [modelUrl, setModelUrl] = useState<string | undefined>(stlUrl);
   const [modelFormat, setModelFormat] = useState<ModelFormat>("stl");
   const [modelSourceLabel, setModelSourceLabel] = useState("CadQuery STL");
@@ -403,8 +403,8 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
       const grid = new GridHelper(
         Math.max(10, gridSize),
         Math.max(4, gridDivisions),
-        0xd5d5db,
-        0xebebef
+        0x2a2d3a,
+        0x1e2030
       );
       grid.rotateX(Math.PI / 2);
       runtime.scene.add(grid);
@@ -573,9 +573,12 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
     <section className="panel previewShell paneSection paneSection--preview">
       <div className="panelHeader previewHeader">
         <div className="previewTitleBlock">
-          <h3>Preview</h3>
+          <h3>Viewport</h3>
           <div className="previewTitleMeta">
-            <span className="rendererBadge">{`Renderer: ${rendererLabel}`}</span>
+            <span className="rendererBadge">{rendererLabel}</span>
+            {modelUrl ? (
+              <span className="rendererBadge">{modelSourceLabel}</span>
+            ) : null}
           </div>
         </div>
         <div className="previewHeaderMeta">
@@ -585,13 +588,22 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
             aria-expanded={settingsOpen}
             aria-controls="preview-settings"
           >
-            {settingsOpen ? "Hide Inspector" : "Show Inspector"}
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" style={{ marginRight: 4 }}>
+              <circle cx="7" cy="7" r="2.5" />
+              <path d="M7 1v1.5M7 11.5V13M1 7h1.5M11.5 7H13M2.8 2.8l1.1 1.1M10.1 10.1l1.1 1.1M11.2 2.8l-1.1 1.1M3.9 10.1L2.8 11.2" />
+            </svg>
+            Inspector
           </button>
         </div>
       </div>
       <div className="viewportToolbar">
         <div className="viewportToolbarGroup">
           <label className="filePicker">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" style={{ marginRight: 4 }}>
+              <path d="M10 7.5v2a1.5 1.5 0 0 1-1.5 1.5h-5A1.5 1.5 0 0 1 2 9.5v-2" />
+              <polyline points="4 4 6 1.5 8 4" />
+              <line x1="6" y1="1.5" x2="6" y2="8" />
+            </svg>
             Load File
             <input
               type="file"
@@ -620,7 +632,10 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
           ) : null}
         </div>
         <div className="viewportToolbarGroup">
-          <span className="rendererBadge">{showGrid ? "Grid On" : "Grid Off"}</span>
+          <span className="rendererBadge">
+            {showGrid ? "Grid" : "No Grid"}
+            {showAxes ? " + Axes" : ""}
+          </span>
         </div>
       </div>
       <div
@@ -638,14 +653,31 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
         <div className="previewStage">
           <div className="previewBody">
             <div ref={mountRef} className="threeViewport" />
+            {/* CAD Axis Gizmo */}
+            <div className="viewportGizmo">
+              <span className="gizmoAxis gizmoAxis--x">X</span>
+              <span className="gizmoAxis gizmoAxis--y">Y</span>
+              <span className="gizmoAxis gizmoAxis--z">Z</span>
+            </div>
+            {/* Viewport info overlay */}
+            <div className="viewportInfo">
+              <span className="viewportInfoItem">{`${status.label}`}</span>
+            </div>
             {!hasViewportContent ? (
               <div className="previewOverlay emptyState">
-                <p>Run script to generate preview</p>
+                <p>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: "middle", marginRight: 8, opacity: 0.5 }}>
+                    <polygon points="12 2 2 7 12 12 22 7 12 2" />
+                    <polyline points="2 17 12 22 22 17" />
+                    <polyline points="2 12 12 17 22 12" />
+                  </svg>
+                  Run script to generate preview
+                </p>
               </div>
             ) : null}
             {hasViewportContent && isLoadingModel ? (
               <div className="previewOverlay">
-                <p>Loading preview...</p>
+                <p>Loading model...</p>
               </div>
             ) : null}
           </div>
@@ -700,7 +732,7 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
                   <section id="inspector-panel-properties" role="tabpanel" className="previewInspectorSection">
                     <div className="previewInspectorLabel">Material</div>
                     <label className="previewColorField">
-                      <span>Material</span>
+                      <span>Color</span>
                       <input
                         type="color"
                         value={matColor}
@@ -763,7 +795,7 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
                     <section className="previewInspectorSection">
                       <div className="previewInspectorLabel">Grid</div>
                       <label className="previewRangeField">
-                        <span>Grid Size</span>
+                        <span>Size</span>
                         <input
                           type="range"
                           min={40}
@@ -807,6 +839,11 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
                     <div className="exportTabLinks">
                       {stlUrl ? (
                         <a href={stlUrl} download className="exportActionLink">
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" style={{ marginRight: 6 }}>
+                            <path d="M11.5 8.5v2.5a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V8.5" />
+                            <polyline points="4.5 6 7 8.5 9.5 6" />
+                            <line x1="7" y1="8.5" x2="7" y2="2" />
+                          </svg>
                           Download STL
                         </a>
                       ) : (
@@ -814,6 +851,11 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
                       )}
                       {stepUrl ? (
                         <a href={stepUrl} download className="exportActionLink">
+                          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" style={{ marginRight: 6 }}>
+                            <path d="M11.5 8.5v2.5a1 1 0 0 1-1 1h-7a1 1 0 0 1-1-1V8.5" />
+                            <polyline points="4.5 6 7 8.5 9.5 6" />
+                            <line x1="7" y1="8.5" x2="7" y2="2" />
+                          </svg>
                           Download STEP
                         </a>
                       ) : (
@@ -830,4 +872,3 @@ export default function PreviewPanel({ stlUrl, stepUrl, status }: Props) {
     </section>
   );
 }
-
