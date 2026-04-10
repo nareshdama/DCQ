@@ -369,8 +369,11 @@ export default function App() {
           <AppHeader
             compactMode={compactMode}
             liveMode={liveMode}
+            onExport={exportModel}
+            onRun={runScriptNow}
             onToggleCompactMode={() => setCompactMode((value) => !value)}
             onToggleLiveMode={() => setLiveMode((value) => !value)}
+            onTogglePalette={toggleCommandPalette}
             status={status}
           />
           
