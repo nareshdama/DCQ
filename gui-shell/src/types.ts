@@ -1,11 +1,15 @@
+export type DiagnosticSeverity = "error" | "warning" | "info";
+
 export type Diagnostic = {
   line: number;
   message: string;
+  severity?: DiagnosticSeverity;
+  detail?: string | null;
 };
 
 export type ExportFormat = "stl" | "step";
 
-export type RunTrigger = "manual" | "live";
+export type RunTrigger = "manual" | "live" | "parameter";
 
 export type StatusTone =
   | "neutral"
@@ -19,6 +23,23 @@ export type UiStatus = {
   tone: StatusTone;
 };
 
+/* ── Scene Graph ── */
+
+export type SceneObjectBBox = {
+  min: number[];
+  max: number[];
+};
+
+export type SceneObject = {
+  name: string;
+  stl?: string;
+  step?: string;
+  color: string;
+  visible: boolean;
+  bbox: SceneObjectBBox;
+  triangles: number;
+};
+
 export type RunResponse = {
   ok: boolean;
   stderr: string;
@@ -27,7 +48,15 @@ export type RunResponse = {
     stl?: string;
     step?: string;
   };
+  scene?: SceneObject[];
   diagnostics?: Diagnostic[];
+  run_id?: string;
+  execution_time_ms?: number;
+};
+
+export type SyntaxCheckResponse = {
+  ok: boolean;
+  diagnostics: Diagnostic[];
 };
 
 export type ExampleItem = {

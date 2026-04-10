@@ -1,4 +1,4 @@
-import { FileText, Code2, Library, Play, Download, Bot, FolderOpen, Zap } from "lucide-react";
+import { FileText, Code2, Library, Play, Download, Bot, FolderOpen, Zap, Layers } from "lucide-react";
 import { useState } from "react";
 import type { RecentProjectEntry } from "../types";
 import FileMenu from "./FileMenu";
@@ -23,6 +23,7 @@ type Props = {
   onRenameProject: () => void;
   onExit: () => void;
   onOpenRecentProject: (entry: RecentProjectEntry) => void;
+  sceneObjectCount: number;
 };
 
 export default function AppSidebar({
@@ -45,6 +46,7 @@ export default function AppSidebar({
   onRenameProject,
   onExit,
   onOpenRecentProject,
+  sceneObjectCount,
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -119,6 +121,18 @@ export default function AppSidebar({
         >
           <Bot className="sidebarIcon" size={20} strokeWidth={1.5} />
           <span>AI</span>
+        </button>
+        <button
+          className={`sidebarNavItem ${activeTab === "scene" ? "sidebarNavItem--active" : ""}`}
+          onClick={() => onTabChange("scene")}
+          aria-label="Scene tree"
+          title="Scene Tree"
+        >
+          <Layers className="sidebarIcon" size={20} strokeWidth={1.5} />
+          <span>Scene</span>
+          {sceneObjectCount > 1 ? (
+            <span className="sidebarNavBadge">{sceneObjectCount}</span>
+          ) : null}
         </button>
       </nav>
 

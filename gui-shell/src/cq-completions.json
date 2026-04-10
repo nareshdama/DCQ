@@ -1,0 +1,515 @@
+{
+  "namespace": [
+    {
+      "label": "Workplane",
+      "type": "class",
+      "detail": "(plane=\"XY\")",
+      "info": "Create a new CadQuery workplane for sketching and solid operations."
+    },
+    {
+      "label": "Assembly",
+      "type": "class",
+      "detail": "()",
+      "info": "Create an assembly for multi-part models, constraints, and export."
+    },
+    {
+      "label": "Sketch",
+      "type": "class",
+      "detail": "()",
+      "info": "Build 2D sketch geometry for later extrusion or placement."
+    },
+    {
+      "label": "Plane",
+      "type": "class",
+      "detail": "()",
+      "info": "Reference named or custom planes for workplanes and transforms."
+    },
+    {
+      "label": "Vector",
+      "type": "class",
+      "detail": "(x, y, z)",
+      "info": "Represent 3D directions, offsets, and positions."
+    },
+    {
+      "label": "Location",
+      "type": "class",
+      "detail": "()",
+      "info": "Represent object placement and transformation in space."
+    },
+    {
+      "label": "Color",
+      "type": "class",
+      "detail": "(nameOrR, g, b, a)",
+      "info": "Define colors for assemblies and exported metadata."
+    },
+    {
+      "label": "selectors",
+      "type": "namespace",
+      "detail": "",
+      "info": "Access selector helpers for faces, edges, vertices, and topology filters."
+    },
+    {
+      "label": "exporters",
+      "type": "namespace",
+      "detail": "",
+      "info": "Export CAD data to STL, STEP, SVG, and other formats."
+    }
+  ],
+  "workplane": [
+    "add",
+    "all",
+    "ancestors",
+    "apply",
+    "bezier",
+    "box",
+    "cboreHole",
+    "center",
+    "chamfer",
+    "circle",
+    "clean",
+    "close",
+    "combine",
+    "combineSolids",
+    "compounds",
+    "consolidateWires",
+    "copyWorkplane",
+    "cskHole",
+    "cut",
+    "cutBlind",
+    "cutEach",
+    "cutThruAll",
+    "cylinder",
+    "each",
+    "eachpoint",
+    "edges",
+    "ellipse",
+    "ellipseArc",
+    "end",
+    "export",
+    "exportSvg",
+    "extrude",
+    "faces",
+    "fillet",
+    "filter",
+    "findFace",
+    "findSolid",
+    "first",
+    "hLine",
+    "hLineTo",
+    "hole",
+    "interpPlate",
+    "intersect",
+    "invoke",
+    "item",
+    "largestDimension",
+    "last",
+    "line",
+    "lineTo",
+    "loft",
+    "map",
+    "mirror",
+    "mirrorX",
+    "mirrorY",
+    "move",
+    "moveTo",
+    "newObject",
+    "offset2D",
+    "parametricCurve",
+    "parametricSurface",
+    "placeSketch",
+    "polarArray",
+    "polarLine",
+    "polarLineTo",
+    "polygon",
+    "polyline",
+    "pushPoints",
+    "radiusArc",
+    "rarray",
+    "rect",
+    "revolve",
+    "rotate",
+    "rotateAboutCenter",
+    "sagittaArc",
+    "section",
+    "shell",
+    "shells",
+    "siblings",
+    "size",
+    "sketch",
+    "slot2D",
+    "solids",
+    "sort",
+    "sphere",
+    "spline",
+    "splineApprox",
+    "split",
+    "sweep",
+    "tag",
+    "tangentArcPoint",
+    "text",
+    "threePointArc",
+    "toOCC",
+    "toPending",
+    "toSvg",
+    "transformed",
+    "translate",
+    "twistExtrude",
+    "union",
+    "vLine",
+    "vLineTo",
+    "val",
+    "vals",
+    "vertices",
+    "wedge",
+    "wire",
+    "wires",
+    "workplane",
+    "workplaneFromTagged"
+  ],
+  "assembly": [
+    "add",
+    "constrain",
+    "export",
+    "load",
+    "save",
+    "shapes",
+    "solve",
+    "toCompound",
+    "traverse"
+  ],
+  "selectors": [
+    {
+      "label": ">X",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select geometry with a positive X direction."
+    },
+    {
+      "label": ">Y",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select geometry with a positive Y direction."
+    },
+    {
+      "label": ">Z",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select geometry with a positive Z direction."
+    },
+    {
+      "label": "<X",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select geometry with a negative X direction."
+    },
+    {
+      "label": "<Y",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select geometry with a negative Y direction."
+    },
+    {
+      "label": "<Z",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select geometry with a negative Z direction."
+    },
+    {
+      "label": "|X",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select geometry parallel to the X axis."
+    },
+    {
+      "label": "|Y",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select geometry parallel to the Y axis."
+    },
+    {
+      "label": "|Z",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select geometry parallel to the Z axis."
+    },
+    {
+      "label": "#X",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select geometry orthogonal to the X axis."
+    },
+    {
+      "label": "#Y",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select geometry orthogonal to the Y axis."
+    },
+    {
+      "label": "#Z",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select geometry orthogonal to the Z axis."
+    },
+    {
+      "label": "%Plane",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select planar geometry."
+    },
+    {
+      "label": "%Circle",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select circular edges."
+    },
+    {
+      "label": "%Line",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select linear edges."
+    },
+    {
+      "label": "%BSpline",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select spline-based geometry."
+    },
+    {
+      "label": "+X",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select the furthest geometry in +X."
+    },
+    {
+      "label": "-X",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select the furthest geometry in -X."
+    },
+    {
+      "label": "+Y",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select the furthest geometry in +Y."
+    },
+    {
+      "label": "-Y",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select the furthest geometry in -Y."
+    },
+    {
+      "label": "+Z",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select the furthest geometry in +Z."
+    },
+    {
+      "label": "-Z",
+      "type": "constant",
+      "detail": "selector",
+      "info": "Select the furthest geometry in -Z."
+    }
+  ],
+  "planes": [
+    {
+      "label": "XY",
+      "type": "constant",
+      "detail": "plane",
+      "info": "Top plane with +Z normal."
+    },
+    {
+      "label": "YZ",
+      "type": "constant",
+      "detail": "plane",
+      "info": "Side plane with +X normal."
+    },
+    {
+      "label": "XZ",
+      "type": "constant",
+      "detail": "plane",
+      "info": "Front plane with +Y normal."
+    },
+    {
+      "label": "front",
+      "type": "constant",
+      "detail": "plane",
+      "info": "Named front plane."
+    },
+    {
+      "label": "back",
+      "type": "constant",
+      "detail": "plane",
+      "info": "Named back plane."
+    },
+    {
+      "label": "left",
+      "type": "constant",
+      "detail": "plane",
+      "info": "Named left plane."
+    },
+    {
+      "label": "right",
+      "type": "constant",
+      "detail": "plane",
+      "info": "Named right plane."
+    },
+    {
+      "label": "top",
+      "type": "constant",
+      "detail": "plane",
+      "info": "Named top plane."
+    },
+    {
+      "label": "bottom",
+      "type": "constant",
+      "detail": "plane",
+      "info": "Named bottom plane."
+    }
+  ],
+  "parameters": [
+    {
+      "label": "centered=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Control whether primitives are centered on each axis."
+    },
+    {
+      "label": "combine=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Control whether a new shape unions, cuts, or stays separate."
+    },
+    {
+      "label": "clean=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Clean resulting solids to remove extra splitter edges."
+    },
+    {
+      "label": "forConstruction=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Mark sketch geometry as construction-only."
+    },
+    {
+      "label": "radius=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Set the radius for circles, spheres, and fillets."
+    },
+    {
+      "label": "diameter=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Set the diameter for holes and circular features."
+    },
+    {
+      "label": "depth=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Set the depth of cuts, holes, or shells."
+    },
+    {
+      "label": "height=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Set the height of extrusions and primitives."
+    },
+    {
+      "label": "length=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Set the length of slots, boxes, and other features."
+    },
+    {
+      "label": "width=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Set the width of boxes, rectangles, and slots."
+    },
+    {
+      "label": "angle=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Set polar, revolve, or slot rotation angles."
+    },
+    {
+      "label": "angleDegrees=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Set angles expressed in degrees."
+    },
+    {
+      "label": "offset=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Set a workplane or transform offset distance."
+    },
+    {
+      "label": "thickness=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Set shell or plate thickness."
+    },
+    {
+      "label": "selector=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Pass a CadQuery selector string or selector object."
+    },
+    {
+      "label": "tag=",
+      "type": "keyword",
+      "detail": "named argument",
+      "info": "Reference or reuse tagged geometry and workplanes."
+    }
+  ],
+  "workplaneSummaries": {
+    "add": "Add geometry to the current stack or chain.",
+    "box": "Create a box solid from length, width, and height.",
+    "cboreHole": "Cut a counterbored hole on the selected faces.",
+    "center": "Shift the local sketch origin before drawing.",
+    "chamfer": "Chamfer the currently selected edges.",
+    "circle": "Create a circle sketch on the current workplane.",
+    "cskHole": "Cut a countersunk hole on the selected faces.",
+    "cut": "Subtract another shape from the current solid.",
+    "cylinder": "Create a cylinder solid at each active point.",
+    "edges": "Select edges using selector strings or selector objects.",
+    "extrude": "Extrude pending wires into a solid.",
+    "faces": "Select faces using selector strings or selector objects.",
+    "fillet": "Round the currently selected edges with a radius.",
+    "hole": "Cut a simple hole on the selected faces.",
+    "intersect": "Keep only the overlapping volume with another solid.",
+    "lineTo": "Draw a line from the current point to a target point.",
+    "loft": "Loft between pending wires or profiles.",
+    "mirror": "Mirror geometry across a plane or face.",
+    "moveTo": "Move the sketch cursor without drawing.",
+    "polygon": "Create a polygon sketch from side count and diameter.",
+    "pushPoints": "Push an array of points onto the stack for patterned features.",
+    "rect": "Create a rectangle sketch on the current workplane.",
+    "revolve": "Revolve pending wires around an axis to form a solid.",
+    "rotate": "Rotate the current stack around an axis.",
+    "shell": "Shell the solid by removing selected faces.",
+    "slot2D": "Create a 2D slot sketch.",
+    "sphere": "Create a sphere solid at each active point.",
+    "sweep": "Sweep a profile along a path to form a solid.",
+    "tag": "Tag geometry or workplanes for later reuse.",
+    "text": "Create or cut 3D text geometry.",
+    "translate": "Translate the current stack by a vector.",
+    "union": "Union another solid into the current result.",
+    "vertices": "Select vertices using selector strings or selector objects.",
+    "workplane": "Create a new workplane relative to the selected face."
+  },
+  "assemblySummaries": {
+    "add": "Add a part or subassembly to the current assembly.",
+    "constrain": "Define an assembly constraint between parts.",
+    "export": "Export the assembly to STEP, STL, or other supported formats.",
+    "load": "Load an assembly from disk.",
+    "save": "Save the assembly to disk.",
+    "shapes": "List the underlying shape objects in the assembly.",
+    "solve": "Solve the current assembly constraints.",
+    "toCompound": "Convert the full assembly tree into a compound shape.",
+    "traverse": "Iterate through child assemblies and parts."
+  }
+}

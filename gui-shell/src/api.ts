@@ -3,20 +3,54 @@ import type {
   ExamplesIndexResponse,
   ExportFormat,
   RunResponse,
+  SyntaxCheckResponse,
   WorkspaceFileInfo,
 } from "./types";
 
 export async function runScript(
   script: string,
-  exportFormats: ExportFormat[] = []
+  exportFormats: ExportFormat[] = [],
+  signal?: AbortSignal,
+  runId?: string
 ): Promise<RunResponse> {
   const response = await fetch(`${API_BASE_URL}/run`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ script, exportFormats })
+    body: JSON.stringify({ script, exportFormats, runId }),
+    signal,
   });
   if (!response.ok) {
     throw new Error(`Run failed: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function checkSyntax(
+  script: string,
+  signal?: AbortSignal
+): Promise<SyntaxCheckResponse> {
+  const response = await fetch(`${API_BASE_URL}/syntax-check`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ script }),
+    signal,
+  });
+  if (!response.ok) {
+    throw new Error(`Syntax check failed: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function cancelRun(
+  runId: string
+): Promise<{ cancelled: boolean; runId: string }> {
+  const response = await fetch(`${API_BASE_URL}/cancel`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ runId }),
+  });
+  if (!response.ok) {
+    throw new Error(`Cancel failed: ${response.status}`);
   }
   return response.json();
 }

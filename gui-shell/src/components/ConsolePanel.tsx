@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Trash2, X, AlertTriangle, FileText, Copy, Check } from "lucide-react";
-import type { Diagnostic } from "../types";
+import { Trash2, X, AlertTriangle, AlertCircle, Info, FileText, Copy, Check } from "lucide-react";
+import type { Diagnostic, DiagnosticSeverity } from "../types";
 
 const CONSOLE_TAB_STORAGE_KEY = "cq-console-tab-v1";
 
@@ -148,14 +148,35 @@ export default function ConsolePanel({
                   <div className="consoleSection">
                     <div className="consoleLabel">Diagnostics</div>
                     <div className="consoleList">
-                      {diagnostics.map((diagnostic, index) => (
-                        <div
-                          key={`${diagnostic.line}-${index}`}
-                          className="consoleEntry consoleEntry--error"
-                        >
-                          {`Line ${diagnostic.line}: ${diagnostic.message}`}
-                        </div>
-                      ))}
+                      {diagnostics.map((diagnostic, index) => {
+                        const severity = diagnostic.severity ?? "error";
+                        const SeverityIcon =
+                          severity === "warning"
+                            ? AlertTriangle
+                            : severity === "info"
+                              ? Info
+                              : AlertCircle;
+                        return (
+                          <div
+                            key={`${diagnostic.line}-${index}`}
+                            className={`consoleEntry consoleEntry--${severity}`}
+                          >
+                            <SeverityIcon
+                              size={12}
+                              strokeWidth={2}
+                              style={{ flexShrink: 0, marginTop: 2 }}
+                            />
+                            <span>
+                              {`Line ${diagnostic.line}: ${diagnostic.message}`}
+                              {diagnostic.detail ? (
+                                <span className="consoleDiagnosticDetail">
+                                  {` — ${diagnostic.detail}`}
+                                </span>
+                              ) : null}
+                            </span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 ) : null}

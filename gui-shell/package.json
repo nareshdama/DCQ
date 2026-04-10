@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@codemirror/autocomplete": "^6.20.1",
     "@codemirror/lang-python": "^6.2.1",
     "@codemirror/lint": "^6.9.5",
     "@codemirror/state": "^6.6.0",

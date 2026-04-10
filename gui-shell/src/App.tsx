@@ -15,8 +15,8 @@ import AppHeader from "./components/AppHeader";
 import AppSidebar from "./components/AppSidebar";
 import EditorToolbar from "./components/EditorToolbar";
 import PanelPlaceholder from "./components/PanelPlaceholder";
-import { SHELL_LAYOUT, STORAGE_KEYS } from "./constants";
-import { useCadQueryRunner } from "./hooks/useCadQueryRunner";
+import { SHELL_LAYOUT, STARTER_SCRIPT, STORAGE_KEYS } from "./constants";
+import { useCadQueryRunner } from "./useCadQueryRunner";
 import { useAIChat } from "./hooks/useAIChat";
 import { useExamples } from "./hooks/useExamples";
 import { useFileSystem } from "./hooks/useFileSystem";
@@ -27,10 +27,12 @@ const CodeEditor = lazy(() => import("./components/CodeEditor"));
 const PreviewPanel = lazy(() => import("./components/PreviewPanel"));
 const AIChatPanel = lazy(() => import("./components/AIChatPanel"));
 const ConsolePanel = lazy(() => import("./components/ConsolePanel"));
+const SceneTree = lazy(() => import("./components/SceneTree"));
 const CommandPalette = lazy(() => import("./components/CommandPalette"));
 const NewProjectDialog = lazy(() => import("./components/NewProjectDialog"));
 
 const LIVE_DEBOUNCE_MS = 1000;
+const PARAMETER_LIVE_DEBOUNCE_MS = 200;
 
 const isMac =
   typeof navigator !== "undefined" && /Mac|iPhone|iPad/i.test(navigator.userAgent);
@@ -73,7 +75,7 @@ function clampConsoleHeight(next: number) {
 export default function App() {
   const [script, setScript] = usePersistentState<string>(
     STORAGE_KEYS.script,
-    "",
+    STARTER_SCRIPT,
   );
   const [liveMode, setLiveMode] = useState(true);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -131,16 +133,80 @@ export default function App() {
   const lastRunIdRef = useRef(0);
   const consoleOpenedForRunRef = useRef(false);
   const liveAbortRef = useRef<AbortController | null>(null);
+  const parameterRunPendingRef = useRef(false);
+  const starterHydrationRef = useRef(false);
   const aiTabActive = sidebarTab === "ai";
   const examplesTabActive = sidebarTab === "examples";
   const filesTabActive = sidebarTab === "files";
+  const [parameterRunTick, setParameterRunTick] = useState(0);
 
   const { examples, loadSelectedExample, selectedExampleFile, setSelectedExampleFile } =
     useExamples(examplesTabActive);
-  const { diagnostics, execute, status, stderr, stdout, stepUrl, stlUrl, setStatus } =
+  const { cancel, diagnostics, execute, scene: rawScene, status, stderr, stdout, stepUrl, stlUrl, setStatus } =
     useCadQueryRunner(script);
 
+  // Mutable scene state — initialized from runner, modified by SceneTree interactions
+  const [sceneState, setSceneState] = useState<import("./types").SceneObject[]>([]);
+  const [selectedSceneIndex, setSelectedSceneIndex] = useState<number | null>(null);
+  const [focusObjectIndex, setFocusObjectIndex] = useState<number | null>(null);
+
+  // Sync scene state from runner output
+  useEffect(() => {
+    setSceneState(rawScene);
+    setSelectedSceneIndex(null);
+    setFocusObjectIndex(null);
+  }, [rawScene]);
+
+  const handleSceneToggleVisibility = useCallback((index: number) => {
+    setSceneState((prev) =>
+      prev.map((obj, i) =>
+        i === index ? { ...obj, visible: !obj.visible } : obj
+      )
+    );
+  }, []);
+
+  const handleSceneChangeColor = useCallback((index: number, color: string) => {
+    setSceneState((prev) =>
+      prev.map((obj, i) =>
+        i === index ? { ...obj, color } : obj
+      )
+    );
+  }, []);
+
+  const handleSceneSelect = useCallback((index: number) => {
+    setSelectedSceneIndex(index);
+    // Trigger focus by setting then clearing (to allow re-focus on same index)
+    setFocusObjectIndex(index);
+  }, []);
+
+  const handleParameterAdjust = useCallback(() => {
+    parameterRunPendingRef.current = true;
+    setParameterRunTick((current) => current + 1);
+  }, []);
+
   const fileSystem = useFileSystem(filesTabActive);
+
+  useEffect(() => {
+    if (starterHydrationRef.current) {
+      return;
+    }
+    starterHydrationRef.current = true;
+
+    if (script.trim()) {
+      return;
+    }
+    if (fileSystem.filePath || fileSystem.projectName || fileSystem.workspaceRoot) {
+      return;
+    }
+
+    setScript(STARTER_SCRIPT);
+  }, [
+    fileSystem.filePath,
+    fileSystem.projectName,
+    fileSystem.workspaceRoot,
+    script,
+    setScript,
+  ]);
 
   const aiChat = useAIChat(script, setScript, aiTabActive);
 
@@ -303,7 +369,8 @@ export default function App() {
   }, [loadExampleIntoEditor, setSelectedExampleFile]);
 
   useEffect(() => {
-    if (!liveMode || !script.trim()) {
+    const isParameterRun = parameterRunPendingRef.current;
+    if ((!liveMode && !isParameterRun) || !script.trim()) {
       return;
     }
     liveAbortRef.current?.abort();
@@ -314,14 +381,15 @@ export default function App() {
       if (!controller.signal.aborted) {
         lastRunIdRef.current += 1;
         consoleOpenedForRunRef.current = false;
-        void execute(["stl"], "live");
+        parameterRunPendingRef.current = false;
+        void execute(["stl"], isParameterRun ? "parameter" : "live");
       }
-    }, LIVE_DEBOUNCE_MS);
+    }, isParameterRun ? PARAMETER_LIVE_DEBOUNCE_MS : LIVE_DEBOUNCE_MS);
     return () => {
       window.clearTimeout(timer);
       controller.abort();
     };
-  }, [execute, liveMode, script]);
+  }, [execute, liveMode, parameterRunTick, script]);
 
   useEffect(() => {
     function onResize() {
@@ -633,6 +701,7 @@ export default function App() {
         onRenameProject={handleRenameProject}
         onExit={handleExit}
         onOpenRecentProject={handleOpenRecentProject}
+        sceneObjectCount={sceneState.length}
       />
       
       <div
@@ -747,6 +816,32 @@ export default function App() {
               </aside>
             ) : null}
 
+            {sidebarTab === "scene" ? (
+              <aside className="sceneSidebar">
+                <div className="sidebarHeader">
+                  <h3>Scene</h3>
+                  <button
+                    type="button"
+                    className="sidebarHeaderClose"
+                    onClick={() => setSidebarTab("editor")}
+                    aria-label="Close scene panel"
+                    title="Close"
+                  >
+                    &times;
+                  </button>
+                </div>
+                <Suspense fallback={null}>
+                  <SceneTree
+                    scene={sceneState}
+                    selectedIndex={selectedSceneIndex}
+                    onSelect={handleSceneSelect}
+                    onToggleVisibility={handleSceneToggleVisibility}
+                    onChangeColor={handleSceneChangeColor}
+                  />
+                </Suspense>
+              </aside>
+            ) : null}
+
             <div className="editorArea">
               <Suspense
                 fallback={
@@ -761,6 +856,7 @@ export default function App() {
                   value={script}
                   onChange={setScript}
                   diagnostics={diagnostics}
+                  onParameterAdjust={handleParameterAdjust}
                   headerCollapsed={editorHeaderCollapsed}
                   headerActions={
                     <EditorToolbar
@@ -828,7 +924,7 @@ export default function App() {
               />
             }
           >
-            <PreviewPanel stlUrl={stlUrl} stepUrl={stepUrl} />
+            <PreviewPanel stlUrl={stlUrl} stepUrl={stepUrl} scene={sceneState} focusObjectIndex={focusObjectIndex} />
           </Suspense>
         </section>
       </div>

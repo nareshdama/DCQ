@@ -1,13 +1,30 @@
+import {
+  autocompletion,
+  completeFromList,
+  type CompletionContext,
+  type CompletionResult,
+} from "@codemirror/autocomplete";
 import { lintGutter, linter } from "@codemirror/lint";
 import { python } from "@codemirror/lang-python";
 import CodeMirror, { EditorView } from "@uiw/react-codemirror";
-import { type ReactNode, useMemo } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  cadQueryCompletions,
+  detectScriptParameters,
+  getCadQueryCompletionKind,
+  getStringCompletionFrom,
+  replaceParameterAssignment,
+  updateParameterInScript,
+  type ScriptParameter,
+} from "../editorIntelligence";
 import type { Diagnostic } from "../types";
+import ParameterOverlay from "./ParameterOverlay";
 
 type Props = {
   value: string;
   onChange: (value: string) => void;
   diagnostics: Diagnostic[];
+  onParameterAdjust?: () => void;
   headerCollapsed?: boolean;
   headerActions?: ReactNode;
   onToggleHeader?: () => void;
@@ -87,18 +104,150 @@ const editorTheme = EditorView.theme({
   },
 }, { dark: true });
 
+const namespaceCompletionSource = completeFromList(cadQueryCompletions.namespace);
+const workplaneCompletionSource = completeFromList(cadQueryCompletions.workplane);
+const assemblyCompletionSource = completeFromList(cadQueryCompletions.assembly);
+const parameterCompletionSource = completeFromList(cadQueryCompletions.parameters);
+
+function buildIdentifierCompletions(
+  context: CompletionContext,
+  source: (context: CompletionContext) => CompletionResult | null,
+  options: readonly {
+    label: string;
+    type?: string;
+    detail?: string;
+    info?: string;
+  }[]
+) {
+  const match = context.matchBefore(/[\w$=]*/);
+  return (
+    source(context) ?? {
+      from: match ? match.from : context.pos,
+      options: [...options],
+      validFor: /^[\w$=]*$/,
+    }
+  );
+}
+
+function buildStringCompletions(
+  context: CompletionContext,
+  options: readonly {
+    label: string;
+    type?: string;
+    detail?: string;
+    info?: string;
+  }[]
+) {
+  const line = context.state.doc.lineAt(context.pos);
+  const linePrefix = line.text.slice(0, context.pos - line.from);
+  return {
+    from: getStringCompletionFrom(linePrefix, line.from),
+    options: [...options],
+    validFor: /^[^"'()\s]*$/,
+  } satisfies CompletionResult;
+}
+
+function cadQueryCompletionSource(context: CompletionContext) {
+  const line = context.state.doc.lineAt(context.pos);
+  const linePrefix = line.text.slice(0, context.pos - line.from);
+  const completionKind = getCadQueryCompletionKind(linePrefix, context.explicit);
+
+  switch (completionKind) {
+    case "namespace":
+      return buildIdentifierCompletions(
+        context,
+        namespaceCompletionSource,
+        cadQueryCompletions.namespace
+      );
+    case "workplane":
+      return buildIdentifierCompletions(
+        context,
+        workplaneCompletionSource,
+        cadQueryCompletions.workplane
+      );
+    case "assembly":
+      return buildIdentifierCompletions(
+        context,
+        assemblyCompletionSource,
+        cadQueryCompletions.assembly
+      );
+    case "parameters":
+      return buildIdentifierCompletions(
+        context,
+        parameterCompletionSource,
+        cadQueryCompletions.parameters
+      );
+    case "selectors":
+      return buildStringCompletions(context, cadQueryCompletions.selectors);
+    case "planes":
+      return buildStringCompletions(context, cadQueryCompletions.planes);
+    default:
+      return null;
+  }
+}
+
 export default function CodeEditor({
   value,
   onChange,
   diagnostics,
+  onParameterAdjust,
   headerCollapsed = false,
   headerActions,
   onToggleHeader,
 }: Props) {
+  const [editorView, setEditorView] = useState<EditorView | null>(null);
+  const previousParametersRef = useRef<ScriptParameter[]>([]);
+
+  const parameters = useMemo(
+    () => detectScriptParameters(value, previousParametersRef.current),
+    [value]
+  );
+
+  useEffect(() => {
+    previousParametersRef.current = parameters;
+  }, [parameters]);
+
+  const handleParameterChange = useCallback(
+    (parameter: ScriptParameter, nextValue: number) => {
+      if (!Number.isFinite(nextValue)) {
+        return;
+      }
+
+      if (!editorView) {
+        const nextScript = updateParameterInScript(value, parameter, nextValue);
+        if (nextScript !== value) {
+          onChange(nextScript);
+          onParameterAdjust?.();
+        }
+        return;
+      }
+
+      const line = editorView.state.doc.line(parameter.lineNumber);
+      const nextLine = replaceParameterAssignment(line.text, parameter, nextValue);
+      if (!nextLine || nextLine === line.text) {
+        return;
+      }
+
+      editorView.dispatch({
+        changes: {
+          from: line.from,
+          to: line.to,
+          insert: nextLine,
+        },
+      });
+      onParameterAdjust?.();
+    },
+    [editorView, onChange, onParameterAdjust, value]
+  );
+
   const extensions = useMemo(
     () => [
       python(),
       editorTheme,
+      autocompletion({
+        override: [cadQueryCompletionSource],
+        activateOnTyping: true,
+      }),
       lintGutter(),
       linter((view) =>
         diagnostics.map((diagnostic) => {
@@ -110,8 +259,10 @@ export default function CodeEditor({
           return {
             from: line.from,
             to: Math.max(line.from, line.to),
-            severity: "error" as const,
-            message: diagnostic.message,
+            severity: diagnostic.severity ?? ("error" as const),
+            message: diagnostic.detail
+              ? `${diagnostic.message} — ${diagnostic.detail}`
+              : diagnostic.message,
           };
         })
       ),
@@ -140,11 +291,13 @@ export default function CodeEditor({
         </div>
       </div>
       <div className="editorSurface">
+        <ParameterOverlay parameters={parameters} onChange={handleParameterChange} />
         <CodeMirror
           value={value}
           height="100%"
           extensions={extensions}
           onChange={onChange}
+          onCreateEditor={(view) => setEditorView(view)}
           className="codeMirror"
           basicSetup={{
             lineNumbers: true,
@@ -153,7 +306,7 @@ export default function CodeEditor({
             highlightActiveLine: true,
             bracketMatching: true,
             closeBrackets: true,
-            autocompletion: true,
+            autocompletion: false,
             searchKeymap: true,
           }}
         />

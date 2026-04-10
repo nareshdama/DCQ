@@ -32,10 +32,13 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 import { convertStepExportToStl, convertStepUploadToStl } from "../api";
 import { STORAGE_KEYS } from "../constants";
 import { usePersistentState } from "../hooks/usePersistentState";
+import type { SceneObject } from "../types";
 
 type Props = {
   stlUrl?: string;
   stepUrl?: string;
+  scene?: SceneObject[];
+  focusObjectIndex?: number | null;
 };
 
 type CameraPreset = "front" | "back" | "top" | "bottom" | "right" | "left" | "iso";
@@ -263,11 +266,12 @@ function clampInspectorWidth(next: number) {
   );
 }
 
-export default function PreviewPanel({ stlUrl, stepUrl }: Props) {
+export default function PreviewPanel({ stlUrl, stepUrl, scene, focusObjectIndex }: Props) {
   const mountRef = useRef<HTMLDivElement | null>(null);
   const localUrlRef = useRef<string | null>(null);
   const runtimeRef = useRef<ViewerRuntime | null>(null);
   const currentObjectRef = useRef<Object3D | null>(null);
+  const sceneMeshesRef = useRef<Map<number, { object: Object3D; material: MeshStandardMaterial }>>(new Map());
   const loadSequenceRef = useRef(0);
   const renderDirtyRef = useRef(true);
   const renderLoopingRef = useRef(false);
@@ -396,9 +400,24 @@ export default function PreviewPanel({ stlUrl, stepUrl }: Props) {
     requestRender();
   }
 
+  function clearSceneMeshes() {
+    const runtime = runtimeRef.current;
+    if (!runtime) return;
+
+    for (const [, entry] of sceneMeshesRef.current) {
+      runtime.scene.remove(entry.object);
+      disposeObject(entry.object);
+      entry.material.dispose();
+    }
+    sceneMeshesRef.current.clear();
+  }
+
   function replaceCurrentObject(nextObject: Object3D | null) {
     const runtime = runtimeRef.current;
     if (!runtime) return;
+
+    // Clear multi-mesh scene if present
+    clearSceneMeshes();
 
     if (currentObjectRef.current) {
       runtime.scene.remove(currentObjectRef.current);
@@ -414,6 +433,86 @@ export default function PreviewPanel({ stlUrl, stepUrl }: Props) {
       applyMetrics(computeSceneMetrics(null));
       requestRender();
     }
+  }
+
+  function fitCameraToAll() {
+    const runtime = runtimeRef.current;
+    if (!runtime) return;
+
+    // Build a combined bounding box from all visible scene meshes
+    const entries = Array.from(sceneMeshesRef.current.values())
+      .filter((entry) => entry.object.visible);
+
+    if (entries.length === 0) {
+      if (currentObjectRef.current) {
+        fitCamera(currentObjectRef.current);
+      }
+      return;
+    }
+
+    // Merge bounding boxes without re-parenting objects
+    const combinedBox = new Box3();
+    for (const entry of entries) {
+      combinedBox.expandByObject(entry.object);
+    }
+
+    const center = combinedBox.getCenter(new Vector3());
+    const size = combinedBox.getSize(new Vector3());
+    const maxDim = Math.max(size.x, size.y, size.z, 0.01);
+
+    const gridStep = niceGridStep(maxDim);
+    const gridSpan = gridStep * 12;
+    const metrics: SceneMetrics = {
+      maxDim,
+      center,
+      size,
+      gridSpan,
+      gridStep,
+      gridDivisions: Math.round(gridSpan / gridStep),
+      gridLabel: formatGridLabel(gridStep),
+      axesLength: maxDim * 0.6,
+      cameraNear: maxDim / 2000,
+      cameraFar: maxDim * 2000,
+      fitDistance: maxDim * 2.2,
+      lightDistance: maxDim * 2,
+      orbitMinDistance: maxDim / 200,
+      orbitMaxDistance: maxDim * 50,
+      orbitPanSpeed: Math.max(0.3, maxDim / 300),
+      coordPrecision: coordPrecisionForScale(maxDim),
+    };
+
+    applyMetrics(metrics);
+
+    const d = metrics.fitDistance;
+    runtime.camera.position.set(
+      center.x + d * 0.8,
+      center.y + d * 0.7,
+      center.z + d * 0.8,
+    );
+    runtime.controls.target.copy(center);
+    runtime.controls.update();
+    requestRender();
+  }
+
+  function focusOnSceneObject(index: number) {
+    const entry = sceneMeshesRef.current.get(index);
+    if (!entry) return;
+    fitCamera(entry.object);
+  }
+
+  function setSceneObjectVisibility(index: number, visible: boolean) {
+    const entry = sceneMeshesRef.current.get(index);
+    if (!entry) return;
+    entry.object.visible = visible;
+    requestRender();
+  }
+
+  function setSceneObjectColor(index: number, color: string) {
+    const entry = sceneMeshesRef.current.get(index);
+    if (!entry) return;
+    entry.material.color.set(color);
+    entry.material.needsUpdate = true;
+    requestRender();
   }
 
   useEffect(() => {
@@ -527,6 +626,7 @@ export default function PreviewPanel({ stlUrl, stepUrl }: Props) {
       resizeObserver?.disconnect();
       cancelAnimationFrame(rafRef.current);
       renderLoopingRef.current = false;
+      clearSceneMeshes();
       replaceCurrentObject(null);
 
       if (runtimeRef.current) {
@@ -615,7 +715,83 @@ export default function PreviewPanel({ stlUrl, stepUrl }: Props) {
     requestRender();
   }, [wireframe, requestRender, viewerReady]);
 
+  // Multi-object scene loading — when scene has 2+ objects, load each STL individually
   useEffect(() => {
+    if (!viewerReady || !runtimeRef.current) return;
+    if (!scene || scene.length <= 1) return;
+
+    const runId = loadSequenceRef.current + 1;
+    loadSequenceRef.current = runId;
+
+    // Clear any existing single-object model
+    if (currentObjectRef.current) {
+      runtimeRef.current.scene.remove(currentObjectRef.current);
+      disposeObject(currentObjectRef.current);
+      currentObjectRef.current = null;
+    }
+    clearSceneMeshes();
+
+    setIsLoadingModel(true);
+    setModelError("");
+    setModelSourceLabel(`CadQuery Scene (${scene.length} objects)`);
+
+    const loadPromises = scene.map(async (sceneObj, index) => {
+      if (!sceneObj.stl) return null;
+
+      const objMaterial = new MeshStandardMaterial({
+        color: sceneObj.color || matColor,
+        metalness,
+        roughness,
+        wireframe,
+      });
+
+      try {
+        const loaded = await loadStl(sceneObj.stl, objMaterial);
+        if (loadSequenceRef.current !== runId) {
+          disposeObject(loaded);
+          objMaterial.dispose();
+          return null;
+        }
+        loaded.visible = sceneObj.visible;
+        return { index, object: loaded, material: objMaterial };
+      } catch {
+        objMaterial.dispose();
+        return null;
+      }
+    });
+
+    void Promise.all(loadPromises).then((results) => {
+      if (loadSequenceRef.current !== runId) {
+        // Stale — dispose all loaded meshes
+        for (const r of results) {
+          if (r) {
+            disposeObject(r.object);
+            r.material.dispose();
+          }
+        }
+        return;
+      }
+
+      const runtime = runtimeRef.current;
+      if (!runtime) return;
+
+      for (const r of results) {
+        if (!r) continue;
+        runtime.scene.add(r.object);
+        sceneMeshesRef.current.set(r.index, {
+          object: r.object,
+          material: r.material,
+        });
+      }
+
+      fitCameraToAll();
+      setIsLoadingModel(false);
+    });
+  }, [scene, viewerReady]);
+
+  // Single-object fallback — use legacy stlUrl pipeline when scene is absent or single-entry
+  useEffect(() => {
+    if (scene && scene.length > 1) return;
     if (!stlUrl) return;
 
     revokeLocalObjectUrl();
@@ -623,9 +799,10 @@ export default function PreviewPanel({ stlUrl, stepUrl }: Props) {
     setModelUrl(stlUrl);
     setModelFormat("stl");
     setModelSourceLabel("CadQuery STL");
-  }, [stlUrl]);
+  }, [stlUrl, scene]);
 
   useEffect(() => {
+    if (scene && scene.length > 1) return;
     if (!viewerReady || !runtimeRef.current) return;
 
     const runId = loadSequenceRef.current + 1;
@@ -657,7 +834,29 @@ export default function PreviewPanel({ stlUrl, stepUrl }: Props) {
         setIsLoadingModel(false);
         setModelError(error.message);
       });
-  }, [modelFormat, modelUrl, viewerReady]);
+  }, [modelFormat, modelUrl, viewerReady, scene]);
+
+  // Focus camera on a specific scene object when the index changes
+  useEffect(() => {
+    if (focusObjectIndex == null) return;
+    focusOnSceneObject(focusObjectIndex);
+  }, [focusObjectIndex]);
+
+  // Sync scene object visibility and color from props into Three.js meshes
+  useEffect(() => {
+    if (!scene || scene.length <= 1) return;
+
+    for (const [index, entry] of sceneMeshesRef.current) {
+      const sceneObj = scene[index];
+      if (!sceneObj) continue;
+      if (entry.object.visible !== sceneObj.visible) {
+        entry.object.visible = sceneObj.visible;
+      }
+      entry.material.color.set(sceneObj.color);
+      entry.material.needsUpdate = true;
+    }
+    requestRender();
+  }, [scene, requestRender]);
 
   useEffect(
     () => () => {
@@ -710,7 +909,8 @@ export default function PreviewPanel({ stlUrl, stepUrl }: Props) {
     function onMouseMove(event: MouseEvent) {
       const rt = runtimeRef.current;
       const obj = currentObjectRef.current;
-      if (!rt || !obj) {
+      const hasSceneMeshes = sceneMeshesRef.current.size > 0;
+      if (!rt || (!obj && !hasSceneMeshes)) {
         setCursorWorldPos(null);
         return;
       }
@@ -719,9 +919,20 @@ export default function PreviewPanel({ stlUrl, stepUrl }: Props) {
       mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
       raycaster.setFromCamera(mouse, rt.camera);
       const meshes: Mesh[] = [];
-      obj.traverse((child: Object3D) => {
-        if ((child as Mesh).isMesh) meshes.push(child as Mesh);
-      });
+      // Collect meshes from single-object pipeline
+      if (obj) {
+        obj.traverse((child: Object3D) => {
+          if ((child as Mesh).isMesh) meshes.push(child as Mesh);
+        });
+      }
+      // Collect meshes from multi-object scene
+      for (const [, entry] of sceneMeshesRef.current) {
+        if (entry.object.visible) {
+          entry.object.traverse((child: Object3D) => {
+            if ((child as Mesh).isMesh) meshes.push(child as Mesh);
+          });
+        }
+      }
       const hits = raycaster.intersectObjects(meshes, false);
       if (hits.length > 0) {
         const p = hits[0].point;
@@ -748,7 +959,7 @@ export default function PreviewPanel({ stlUrl, stepUrl }: Props) {
     };
   }, [viewerReady]);
 
-  const hasViewportContent = Boolean(modelUrl);
+  const hasViewportContent = Boolean(modelUrl) || (scene && scene.length > 1);
 
   function beginInspectorResize(event: ReactPointerEvent<HTMLDivElement>) {
     event.preventDefault();

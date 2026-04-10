@@ -93,7 +93,7 @@ class ExampleLibraryValidationTest(unittest.TestCase):
         for path in self.example_paths:
             with self.subTest(example=path.name):
                 code = path.read_text(encoding="utf-8")
-                response = self.server.run_script(
+                response = self.server._run_script_sync(
                     self.server.RunRequest(script=code, exportFormats=[])
                 )
                 self.assertTrue(
@@ -102,7 +102,7 @@ class ExampleLibraryValidationTest(unittest.TestCase):
                 )
 
     def test_bridge_accepts_show_object_fallback(self) -> None:
-        response = self.server.run_script(
+        response = self.server._run_script_sync(
             self.server.RunRequest(
                 script="shape = cq.Workplane('XY').box(1, 2, 3)\nshow_object(shape)\n",
                 exportFormats=[],
