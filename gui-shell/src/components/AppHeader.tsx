@@ -1,36 +1,46 @@
-import { ChevronRight } from "lucide-react";
+import type { UiStatus } from "../types";
 
 type Props = {
-  projectName: string | null;
-  fileName: string;
-  isDirty: boolean;
+  compactMode: boolean;
+  liveMode: boolean;
+  onToggleCompactMode: () => void;
+  onToggleLiveMode: () => void;
+  status: UiStatus;
 };
 
 export default function AppHeader({
-  projectName,
-  fileName,
-  isDirty,
+  compactMode,
+  liveMode,
+  onToggleCompactMode,
+  onToggleLiveMode,
+  status,
 }: Props) {
   return (
     <header className="topBar">
       <div className="titleBlock">
         <div className="titleRow">
           <h1>DCQ.io</h1>
-
-          <div className="breadcrumb">
-            {projectName ? (
-              <>
-                <span className="breadcrumbProject">{projectName}</span>
-                <ChevronRight size={12} strokeWidth={2} className="breadcrumbSep" />
-              </>
-            ) : null}
-            <span className="breadcrumbFile">
-              {isDirty ? <span className="dirtyDot" /> : null}
-              {fileName}
-            </span>
-          </div>
+          <span className={`statusPill statusPill--${status.tone}`}>{status.label}</span>
         </div>
-        <p className="muted">Code-first CAD workspace</p>
+        <p className="muted">Code-first mechanical modeling workspace</p>
+      </div>
+      <div className="topBarActions">
+        <button
+          type="button"
+          onClick={onToggleLiveMode}
+          aria-pressed={liveMode}
+          aria-label={liveMode ? "Disable live preview" : "Enable live preview"}
+        >
+          {liveMode ? "Live: On" : "Live: Off"}
+        </button>
+        <button
+          type="button"
+          onClick={onToggleCompactMode}
+          aria-pressed={compactMode}
+          aria-label={compactMode ? "Switch to cozy density" : "Switch to compact density"}
+        >
+          {compactMode ? "Density: Compact" : "Density: Cozy"}
+        </button>
       </div>
     </header>
   );

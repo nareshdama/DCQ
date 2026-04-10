@@ -1,6 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Trash2, X, AlertTriangle, AlertCircle, Info, FileText, Copy, Check } from "lucide-react";
-import type { Diagnostic, DiagnosticSeverity } from "../types";
+import { useEffect, useRef, useState } from "react";
+import type { Diagnostic, UiStatus } from "../types";
 
 const CONSOLE_TAB_STORAGE_KEY = "cq-console-tab-v1";
 
@@ -8,6 +7,7 @@ type ConsoleTab = "problems" | "output";
 
 type Props = {
   height: number;
+  status: UiStatus;
   diagnostics: Diagnostic[];
   stdout?: string;
   stderr?: string;
@@ -18,6 +18,7 @@ type Props = {
 
 export default function ConsolePanel({
   height,
+  status,
   diagnostics,
   stdout,
   stderr,
@@ -37,29 +38,15 @@ export default function ConsolePanel({
         : window.localStorage.getItem(CONSOLE_TAB_STORAGE_KEY);
     return saved === "output" ? "output" : "problems";
   });
-  const previousProblemCountRef = useRef(problemsCount);
-  const [copied, setCopied] = useState(false);
-
-  const copyConsoleContent = useCallback(() => {
-    let text = "";
-    if (activeTab === "problems") {
-      const diagLines = diagnostics.map((d) => `Line ${d.line}: ${d.message}`);
-      text = [...diagLines, stderr ?? ""].filter(Boolean).join("\n");
-    } else {
-      text = stdout ?? "";
-    }
-    void navigator.clipboard.writeText(text).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
-    });
-  }, [activeTab, diagnostics, stderr, stdout]);
+  const previousProblemCountRef = useRef<number | null>(null);
 
   useEffect(() => {
     window.localStorage.setItem(CONSOLE_TAB_STORAGE_KEY, activeTab);
   }, [activeTab]);
 
   useEffect(() => {
-    if (problemsCount > 0 && previousProblemCountRef.current === 0) {
+    const prev = previousProblemCountRef.current;
+    if (problemsCount > 0 && (prev === null || prev === 0)) {
       setActiveTab("problems");
     }
     if (problemsCount === 0 && outputCount > 0 && activeTab === "problems") {
@@ -85,8 +72,7 @@ export default function ConsolePanel({
               }`}
               onClick={() => setActiveTab("problems")}
             >
-              <AlertTriangle size={11} strokeWidth={2} />
-              {` Problems (${problemsCount})`}
+              {`Problems (${problemsCount})`}
             </button>
             <button
               type="button"
@@ -99,36 +85,19 @@ export default function ConsolePanel({
               }`}
               onClick={() => setActiveTab("output")}
             >
-              <FileText size={11} strokeWidth={2} />
-              {` Output (${outputCount})`}
+              {`Output (${outputCount})`}
             </button>
           </div>
         </div>
         <div className="consoleHeaderActions">
-          <button
-            type="button"
-            onClick={copyConsoleContent}
-            title="Copy to clipboard"
-            aria-label="Copy console output"
-          >
-            {copied ? <Check size={13} strokeWidth={1.5} /> : <Copy size={13} strokeWidth={1.5} />}
+          <span className={`statusPill statusPill--compact statusPill--${status.tone}`}>
+            {status.label}
+          </span>
+          <button type="button" onClick={onClear} disabled={!canClear}>
+            Clear
           </button>
-          <button
-            type="button"
-            onClick={onClear}
-            disabled={!canClear}
-            title="Clear console"
-            aria-label="Clear console"
-          >
-            <Trash2 size={13} strokeWidth={1.5} />
-          </button>
-          <button
-            type="button"
-            onClick={onHide}
-            title="Hide console"
-            aria-label="Hide console"
-          >
-            <X size={13} strokeWidth={1.5} />
+          <button type="button" onClick={onHide}>
+            Hide
           </button>
         </div>
       </div>
@@ -148,35 +117,14 @@ export default function ConsolePanel({
                   <div className="consoleSection">
                     <div className="consoleLabel">Diagnostics</div>
                     <div className="consoleList">
-                      {diagnostics.map((diagnostic, index) => {
-                        const severity = diagnostic.severity ?? "error";
-                        const SeverityIcon =
-                          severity === "warning"
-                            ? AlertTriangle
-                            : severity === "info"
-                              ? Info
-                              : AlertCircle;
-                        return (
-                          <div
-                            key={`${diagnostic.line}-${index}`}
-                            className={`consoleEntry consoleEntry--${severity}`}
-                          >
-                            <SeverityIcon
-                              size={12}
-                              strokeWidth={2}
-                              style={{ flexShrink: 0, marginTop: 2 }}
-                            />
-                            <span>
-                              {`Line ${diagnostic.line}: ${diagnostic.message}`}
-                              {diagnostic.detail ? (
-                                <span className="consoleDiagnosticDetail">
-                                  {` — ${diagnostic.detail}`}
-                                </span>
-                              ) : null}
-                            </span>
-                          </div>
-                        );
-                      })}
+                      {diagnostics.map((diagnostic, index) => (
+                        <div
+                          key={`${diagnostic.line}-${index}`}
+                          className="consoleEntry consoleEntry--error"
+                        >
+                          {`Line ${diagnostic.line}: ${diagnostic.message}`}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ) : null}

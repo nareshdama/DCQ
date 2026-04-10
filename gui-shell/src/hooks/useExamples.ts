@@ -10,6 +10,8 @@ function sanitizeExampleTitle(title: string, file: string) {
 
 export function useExamples(active = false) {
   const [examples, setExamples] = useState<ExampleItem[]>([]);
+  const [examplesError, setExamplesError] = useState<string | null>(null);
+  const [examplesLoading, setExamplesLoading] = useState(true);
   const [selectedExampleFile, setSelectedExampleFile] = useState("");
   const fetchedRef = useRef(false);
 
@@ -18,23 +20,26 @@ export function useExamples(active = false) {
     fetchedRef.current = true;
 
     let cancelled = false;
+    setExamplesLoading(true);
 
     void (async () => {
       try {
         const index = await getExamplesIndex();
-        if (cancelled) {
-          return;
-        }
+        if (cancelled) return;
 
         const nextExamples = (index.examples ?? []).map((example) => ({
           ...example,
           title: sanitizeExampleTitle(example.title, example.file),
         }));
         setExamples(nextExamples);
+        setExamplesError(null);
       } catch {
         if (!cancelled) {
           setExamples([]);
+          setExamplesError("Failed to load examples. Is the server running?");
         }
+      } finally {
+        if (!cancelled) setExamplesLoading(false);
       }
     })();
 
@@ -53,6 +58,8 @@ export function useExamples(active = false) {
 
   return {
     examples,
+    examplesError,
+    examplesLoading,
     loadSelectedExample,
     selectedExampleFile,
     setSelectedExampleFile,
